@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>מי חייב למי</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="מי חייב למי">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#08111a">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karantina:wght@700&family=Rubik:wght@400;500;700&display=swap">
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#08111a;--card:#0f1c29;--card2:#142536;--line:#22384d;
+  --text:#eef3f6;--muted:#8aa0b3;--mint:#3ddc97;--coral:#ff7a6b;--gold:#f2c14e;--sky:#6cb8ff;
+  --display:'Karantina',Rubik,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 Rubik,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent}
+body{padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  background:radial-gradient(1200px 500px at 80% -10%,rgba(61,220,151,.14),transparent 60%),radial-gradient(900px 400px at -10% 10%,rgba(108,184,255,.1),transparent 60%),var(--bg);min-height:100vh}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input,select{font:inherit;font-size:16px;color:var(--text);background:#0b1622;border:1px solid var(--line);border-radius:12px;padding:11px 12px;width:100%}
+input:focus,select:focus{outline:2px solid var(--mint);outline-offset:1px}
+main{max-width:620px;margin:0 auto;padding:16px 16px 40px;display:grid;gap:16px}
+header{display:flex;align-items:center;gap:10px;padding-top:6px}
+h1{margin:0;flex:1;font-family:var(--display);font-size:3.1rem;line-height:.9;letter-spacing:.01em}
+h1 span{color:var(--mint)}
+h2{margin:0;font-family:var(--display);font-size:2.1rem;line-height:1;font-weight:700}
+.icon{width:42px;height:42px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:1.1rem;display:grid;place-items:center}
+.note{border-radius:14px;padding:10px 14px;font-weight:500;border:1px solid var(--line);background:var(--card)}
+.note.view{border-color:rgba(108,184,255,.45);background:rgba(108,184,255,.08);color:#bfe0ff}
+.note.owner{border-color:rgba(61,220,151,.45);background:rgba(61,220,151,.07);color:var(--mint)}
+.note.warn{border-color:rgba(255,122,107,.5);color:var(--coral)}
+.card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:20px;padding:16px;display:grid;gap:12px}
+.sh{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.sh small{color:var(--muted)}
+/* summary transfers */
+.tx{display:grid;gap:10px}
+.trow{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;background:#0b1622;border:1px solid var(--line);border-radius:16px;padding:12px}
+.who{display:flex;align-items:center;gap:8px;min-width:0}
+.who b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow .who:last-child{justify-content:flex-end}
+.av{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#08111a;background:var(--c,#6cb8ff)}
+.amt{display:grid;justify-items:center;line-height:1}
+.amt em{font-style:normal;font-family:var(--display);font-size:1.9rem;color:var(--gold)}
+.amt small{color:var(--muted);font-size:.72rem;margin-top:2px}
+.arrow{color:var(--muted);font-size:.8rem}
+.payb{grid-column:1/-1;justify-self:center;font-size:.85rem;color:var(--mint);border:1px solid rgba(61,220,151,.4);border-radius:999px;padding:5px 14px}
+.empty{color:var(--muted);text-align:center;padding:10px 0}
+.balanced{text-align:center;font-size:1.15rem;padding:8px 0}
+/* people */
+.people{display:flex;flex-wrap:wrap;gap:8px}
+.pchip{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px;background:#0b1622;border:1.5px solid var(--line);transition:transform .12s}
+.pchip:active{transform:scale(.96)}
+.pchip.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 18%,#0b1622)}
+.pchip .av{width:30px;height:30px;font-size:.9rem}
+.pchip span{display:grid;line-height:1.1;text-align:right}
+.pchip span em{font-style:normal;font-size:.82rem;font-weight:700}
+.pos{color:var(--mint)}.neg{color:var(--coral)}.zero{color:var(--muted)}
+.addp{display:flex;gap:8px}
+.addp input{flex:1}
+/* buttons */
+.btn{border-radius:14px;padding:12px 16px;font-weight:700}
+.btn.mint{background:var(--mint);color:#062016}
+.btn.ghost{border:1px solid var(--line);background:#0b1622}
+.btn.small{padding:9px 14px;font-weight:500}
+/* add form */
+.seg{display:grid;grid-template-columns:1fr 1fr;background:#0b1622;border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
+.seg button{border-radius:10px;padding:9px;font-weight:500;color:var(--muted)}
+.seg button.on{background:var(--card2);color:var(--text);box-shadow:inset 0 0 0 1px var(--line)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label.f{display:grid;gap:5px;font-size:.85rem;color:var(--muted)}
+.among{display:flex;flex-wrap:wrap;gap:6px}
+.among button{padding:6px 12px;border-radius:999px;border:1px solid var(--line);color:var(--muted);font-size:.9rem}
+.among button.on{border-color:var(--mint);color:var(--text);background:rgba(61,220,151,.12)}
+.hint{color:var(--muted);font-size:.85rem;margin:0}
+/* entries */
+.list{display:grid;gap:8px}
+.ent{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:#0b1622;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.ent .k{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:1rem;background:var(--card2)}
+.ent .t{min-width:0}
+.ent .t b{display:block}
+.ent .t small{color:var(--muted)}
+.ent .r{display:grid;justify-items:end;gap:4px}
+.ent .r em{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums}
+.ent .del{color:var(--muted);font-size:.85rem;padding:2px 6px}
+.filterbar{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:.9rem}
+.filterbar button{color:var(--sky)}
+footer{color:#56708a;font-size:.8rem;text-align:center}
+.viewonly .own{display:none!important}
+/* modal / toast / install hint */
+.modal{position:fixed;inset:0;z-index:60;background:rgba(3,8,14,.75);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-items:center;padding:20px}
+.mbox{width:min(380px,100%);background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid var(--line);border-top:3px solid var(--mint);border-radius:20px;padding:20px;display:grid;gap:10px;text-align:center}
+.mbox h3{margin:0;font-family:var(--display);font-size:2.2rem;color:var(--mint)}
+.mbox p{margin:0;color:var(--muted)}
+.mbox input{text-align:left}
+.lgerr{color:var(--coral);min-height:1.2em;font-size:.9rem}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#e9f7f0;color:#062016;padding:10px 18px;border-radius:999px;font-weight:500;z-index:70;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.ihint{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:55;background:var(--card2);border:1px solid var(--mint);border-radius:16px;padding:12px 44px 12px 14px;line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.ihint button{position:absolute;top:8px;left:8px;width:30px;height:30px;border-radius:50%;border:1px solid var(--line)}
+.ihint .sh2{display:inline-block;border:1px solid var(--text);border-radius:5px;padding:0 4px;font-size:.85em}
+</style>
+</head>
+<body class="viewonly">
+<main>
+  <header>
+    <h1>מי חייב <span>למי</span></h1>
+    <button class="icon" id="share" aria-label="שליחת סיכום בווטסאפ">💬</button>
+    <button class="icon" id="loginBtn" aria-label="כניסת מנהל">🔑</button>
+  </header>
+
+  <div class="note view" id="note">טוען…</div>
+
+  <section class="card" aria-labelledby="hSum">
+    <div class="sh"><h2 id="hSum">מי משלם למי</h2><small id="sumSub"></small></div>
+    <div class="tx" id="tx"></div>
+  </section>
+
+  <section class="card" aria-labelledby="hPpl">
+    <div class="sh"><h2 id="hPpl">החבר'ה</h2><small>הקישו על חבר כדי לראות רק אותו</small></div>
+    <div class="people" id="people"></div>
+    <div class="addp own">
+      <input id="newName" placeholder="שם של חבר חדש" maxlength="20" autocomplete="off">
+      <button class="btn ghost small" id="addName">הוסף</button>
+    </div>
+  </section>
+
+  <section class="card own" aria-labelledby="hAdd">
+    <div class="sh"><h2 id="hAdd">רישום חדש</h2></div>
+    <div class="seg" role="tablist">
+      <button class="on" data-kind="split" role="tab">🧾 הוצאה משותפת</button>
+      <button data-kind="debt" role="tab">🤝 חוב ישיר</button>
+    </div>
+    <div id="fSplit" class="grid2">
+      <label class="f">מי שילם<select id="sPayer"></select></label>
+      <label class="f">כמה (₪)<input id="sAmt" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></label>
+      <label class="f" style="grid-column:1/-1">על מה<input id="sNote" placeholder="למשל: פיצה, דלק, מתנה" maxlength="40"></label>
+      <div style="grid-column:1/-1;display:grid;gap:6px"><span class="hint">מתחלק בין:</span><div class="among" id="sAmong"></div></div>
+    </div>
+    <div id="fDebt" class="grid2" hidden>
+      <label class="f">מי חייב<select id="dFrom"></select></label>
+      <label class="f">למי<select id="dTo"></select></label>
+      <label class="f">כמה (₪)<input id="dAmt" type="number" inputmode="decimal" min="0" step="any" placeholder="0"></label>
+      <label class="f">על מה<input id="dNote" placeholder="למשל: הלוואה" maxlength="40"></label>
+    </div>
+    <p class="hint" id="preview"></p>
+    <button class="btn mint" id="addEntry">הוסף רישום</button>
+  </section>
+
+  <section class="card" aria-labelledby="hList">
+    <div class="sh"><h2 id="hList">כל הרישומים</h2><small id="listSub"></small></div>
+    <div class="filterbar" id="filterbar" hidden><span id="filterTxt"></span><button id="clearFilter">הצג את כולם</button></div>
+    <div class="list" id="list"></div>
+  </section>
+
+  <footer>מסונכרן לכל מי שיש לו את האפליקציה · רק המנהל יכול לשנות</footer>
+</main>
+
+<div class="modal" id="loginModal" hidden><div class="mbox">
+  <h3>כניסת מנהל</h3>
+  <div id="lgForm" style="display:grid;gap:10px">
+    <p>אותו מייל וסיסמה כמו בקופת הפוקר.</p>
+    <input id="lgEmail" type="email" inputmode="email" placeholder="מייל" autocomplete="username" dir="ltr">
+    <input id="lgPass" type="password" placeholder="סיסמה" autocomplete="current-password" dir="ltr">
+    <div class="lgerr" id="lgErr"></div>
+    <button class="btn mint" id="lgIn">כניסה</button>
+  </div>
+  <div id="lgOut" hidden style="display:grid;gap:10px"><p id="lgWho"></p><button class="btn ghost" id="lgSignOut">יציאה ממצב מנהל</button></div>
+  <button class="btn ghost small" id="lgClose">סגור</button>
+</div></div>
+<div class="toast" id="toast" hidden></div>
+<div class="ihint" id="installHint" hidden>
+  <b>להתקנה כאפליקציה:</b> לחצו על <span class="sh2">⬆︎</span> שיתוף למטה ← "הוסף למסך הבית"
+  <button id="ihClose" aria-label="סגור">✕</button>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const r2=n=>Math.round(n*100)/100;
+const fmt=n=>r2(n).toLocaleString('he-IL',{maximumFractionDigits:2});
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const COLORS=['#f2c14e','#6cb8ff','#ff8a7a','#3ddc97','#c79bff','#ffb36b','#5fd4e0','#f58fc0','#a7d26a','#e0e6ea'];
+const KEY='hov.cache.v1';
+let D={people:[],entries:[],updated:0};
+try{const c=JSON.parse(localStorage.getItem(KEY));if(c&&Array.isArray(c.people))D=c}catch(_){}
+let VIEW=true,fbRef=null,fbAuth=null,fbUser=null,gotRemote=false,filter=null,kind='split',among=null;
+
+const toArr=x=>Array.isArray(x)?x.filter(v=>v!=null):x&&typeof x==='object'?Object.values(x):[];
+function clean(d){
+  const people=toArr(d&&d.people).map((p,i)=>({id:String(p.id),name:String(p.name||'?'),c:p.c||COLORS[i%COLORS.length]}));
+  const entries=toArr(d&&d.entries).map(e=>({id:String(e.id),k:e.k,from:e.from||'',to:e.to||'',payer:e.payer||'',among:toArr(e.among).map(String),
+    amount:Number(e.amount)||0,note:String(e.note||''),ts:Number(e.ts)||0}));
+  return{people,entries,updated:Number(d&&d.updated)||0};
+}
+const person=id=>D.people.find(p=>p.id===id);
+const pname=id=>(person(id)||{name:'?'}).name;
+const pcol=id=>(person(id)||{}).c||'#6cb8ff';
+const av=id=>`<span class="av" style="--c:${pcol(id)}">${esc(pname(id).slice(0,1))}</span>`;
+
+/* ---------- money math ---------- */
+function balances(){
+  const b={};D.people.forEach(p=>b[p.id]=0);
+  for(const e of D.entries){
+    if(e.k==='debt'){b[e.from]=(b[e.from]||0)-e.amount;b[e.to]=(b[e.to]||0)+e.amount}
+    else if(e.k==='pay'){b[e.from]=(b[e.from]||0)+e.amount;b[e.to]=(b[e.to]||0)-e.amount}
+    else if(e.k==='split'&&e.among.length){const sh=e.amount/e.among.length;
+      for(const p of e.among){if(p!==e.payer){b[p]=(b[p]||0)-sh;b[e.payer]=(b[e.payer]||0)+sh}}}
+  }
+  for(const k in b)b[k]=r2(b[k]);
+  return b;
+}
+// fewest transfers: biggest debtor pays biggest creditor, repeat
+function transfers(b){
+  const deb=[],cred=[];
+  for(const[id,v]of Object.entries(b)){if(v<-0.005)deb.push({id,v:-v});else if(v>0.005)cred.push({id,v})}
+  deb.sort((x,y)=>y.v-x.v);cred.sort((x,y)=>y.v-x.v);
+  const out=[];let i=0,j=0;
+  while(i<deb.length&&j<cred.length){const a=Math.min(deb[i].v,cred[j].v);
+    if(a>0.005)out.push({from:deb[i].id,to:cred[j].id,amount:r2(a)});
+    deb[i].v-=a;cred[j].v-=a;if(deb[i].v<0.005)i++;if(cred[j].v<0.005)j++}
+  return out;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const b=balances(),tx=transfers(b);
+  document.body.classList.toggle('viewonly',VIEW);
+  // summary
+  const shown=filter?tx.filter(t=>t.from===filter||t.to===filter):tx;
+  $('sumSub').textContent=tx.length?`${tx.length} העברות סוגרות הכל`:'';
+  $('tx').innerHTML=!D.people.length?`<div class="empty">עוד אין חבר'ה ברשימה</div>`
+    :!tx.length?`<div class="balanced">כולם מאוזנים 🎉</div>`
+    :!shown.length?`<div class="empty">${esc(pname(filter))} לא חייב לאף אחד ואף אחד לא חייב לו</div>`
+    :shown.map(t=>`<div class="trow"><div class="who">${av(t.from)}<b>${esc(pname(t.from))}</b></div>
+      <div class="amt"><em>${fmt(t.amount)} ₪</em><small>משלם ל ←</small></div>
+      <div class="who"><b>${esc(pname(t.to))}</b>${av(t.to)}</div>
+      <button class="payb own" data-pay="${t.from}|${t.to}|${t.amount}">✓ סמן ששולם</button></div>`).join('');
+  // people
+  $('people').innerHTML=D.people.map(p=>{const v=b[p.id]||0,cls=v>0.005?'pos':v<-0.005?'neg':'zero';
+    const txt=v>0.005?`מקבל ${fmt(v)} ₪`:v<-0.005?`חייב ${fmt(-v)} ₪`:'מאוזן';
+    return `<button class="pchip${filter===p.id?' on':''}" style="--c:${p.c}" data-person="${p.id}">${av(p.id)}<span><b>${esc(p.name)}</b><em class="${cls}">${txt}</em></span></button>`}).join('')
+    ||`<div class="empty own">הוסיפו את החבר'ה כדי להתחיל</div>`;
+  // form selects
+  const opts=D.people.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
+  for(const id of['sPayer','dFrom','dTo']){const s=$(id),v=s.value;s.innerHTML=opts;if(person(v))s.value=v}
+  if($('dTo').value===$('dFrom').value&&D.people.length>1)$('dTo').value=D.people.find(p=>p.id!==$('dFrom').value).id;
+  if(!among)among=new Set(D.people.map(p=>p.id));
+  for(const id of[...among])if(!person(id))among.delete(id);
+  $('sAmong').innerHTML=D.people.map(p=>`<button class="${among.has(p.id)?'on':''}" data-among="${p.id}">${esc(p.name)}</button>`).join('');
+  preview();
+  // entries (newest first)
+  const list=D.entries.slice().sort((a,b)=>b.ts-a.ts).filter(e=>!filter||e.from===filter||e.to===filter||e.payer===filter||e.among.includes(filter));
+  $('filterbar').hidden=!filter;$('filterTxt').textContent=filter?`מציג רק רישומים של ${pname(filter)}`:'';
+  $('listSub').textContent=D.entries.length?`${D.entries.length} רישומים`:'';
+  $('list').innerHTML=list.map(e=>{
+    const d=e.ts?new Date(e.ts).toLocaleDateString('he-IL',{day:'numeric',month:'numeric'}):'';
+    let icon,title,sub;
+    if(e.k==='split'){icon='🧾';title=`${pname(e.payer)} שילם על ${e.note?esc(e.note):'הוצאה'}`;
+      sub=`מתחלק בין ${e.among.length}: ${e.among.map(pname).map(esc).join(', ')} · ${fmt(e.amount/Math.max(1,e.among.length))} ₪ לאחד`}
+    else if(e.k==='pay'){icon='✅';title=`${esc(pname(e.from))} החזיר ל${esc(pname(e.to))}`;sub='תשלום'}
+    else{icon='🤝';title=`${esc(pname(e.from))} חייב ל${esc(pname(e.to))}`;sub=e.note?esc(e.note):'חוב'}
+    return `<div class="ent"><span class="k">${icon}</span><div class="t"><b>${title}</b><small>${sub}${d?' · '+d:''}</small></div>
+      <div class="r"><em>${fmt(e.amount)} ₪</em><button class="del own" data-del="${e.id}" aria-label="מחיקה">מחק</button></div></div>`}).join('')
+    ||`<div class="empty">אין עדיין רישומים</div>`;
+}
+function preview(){
+  const n=among?among.size:0,a=parseFloat($('sAmt').value);
+  $('preview').textContent=kind==='split'&&a>0&&n?`כל אחד מ-${n} משלם ${fmt(a/n)} ₪`:'';
+}
+
+/* ---------- saving ---------- */
+let pushT=null;
+function commit(){
+  D.updated=Date.now();
+  try{localStorage.setItem(KEY,JSON.stringify(D))}catch(_){}
+  render();
+  if(!fbRef||VIEW)return;
+  clearTimeout(pushT);
+  pushT=setTimeout(()=>fbRef.set(JSON.parse(JSON.stringify(D))).then(()=>setNote('owner','🔒 אתה המנהל · כל שינוי נשמר ונשלח לכולם מיד'))
+    .catch(()=>setNote('warn','⚠️ אין הרשאה לשמור: רק המנהל יכול לשנות')),250);
+}
+function setNote(c,t){const n=$('note');n.className='note '+c;n.textContent=t}
+function toast(t){const el=$('toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,1800)}
+
+/* ---------- actions ---------- */
+document.addEventListener('click',e=>{
+  const p=e.target.closest('[data-person]');if(p){filter=filter===p.dataset.person?null:p.dataset.person;render();return}
+  const am=e.target.closest('[data-among]');if(am){const id=am.dataset.among;among.has(id)?among.delete(id):among.add(id);render();return}
+  const sk=e.target.closest('[data-kind]');if(sk){kind=sk.dataset.kind;document.querySelectorAll('[data-kind]').forEach(b=>b.classList.toggle('on',b===sk));
+    $('fSplit').hidden=kind!=='split';$('fDebt').hidden=kind!=='debt';preview();return}
+  if(VIEW)return;
+  const pay=e.target.closest('[data-pay]');if(pay){const[from,to,amount]=pay.dataset.pay.split('|');
+    D.entries.push({id:uid(),k:'pay',from,to,amount:Number(amount),note:'',ts:Date.now(),among:[],payer:''});commit();toast('נרשם ששולם ✓');return}
+  const del=e.target.closest('[data-del]');if(del){const id=del.dataset.del;
+    if(del.dataset.sure){D.entries=D.entries.filter(x=>x.id!==id);commit();toast('נמחק')}
+    else{del.dataset.sure='1';del.textContent='בטוח?';del.style.color='var(--coral)';setTimeout(()=>{if(del.isConnected){delete del.dataset.sure;del.textContent='מחק';del.style.color=''}},2500)}
+    return}
+});
+$('clearFilter').onclick=()=>{filter=null;render()};
+$('sAmt').addEventListener('input',preview);
+function addName(){const n=$('newName').value.trim();if(!n||VIEW)return;
+  if(D.people.some(p=>p.name===n)){toast('כבר יש חבר בשם הזה');return}
+  const id=uid();D.people.push({id,name:n,c:COLORS[D.people.length%COLORS.length]});among&&among.add(id);$('newName').value='';commit()}
+$('addName').onclick=addName;$('newName').addEventListener('keydown',e=>{if(e.key==='Enter')addName()});
+$('addEntry').onclick=()=>{
+  if(VIEW)return;
+  if(D.people.length<2){toast('צריך לפחות שני חברים');return}
+  if(kind==='split'){
+    const a=parseFloat($('sAmt').value),payer=$('sPayer').value,list=[...among];
+    if(!(a>0)){$('sAmt').focus();toast('כמה זה עלה?');return}
+    if(!list.length){toast('בחרו בין מי מתחלק');return}
+    D.entries.push({id:uid(),k:'split',payer,among:list,amount:r2(a),note:$('sNote').value.trim(),ts:Date.now(),from:'',to:''});
+    $('sAmt').value='';$('sNote').value='';
+  }else{
+    const a=parseFloat($('dAmt').value),from=$('dFrom').value,to=$('dTo').value;
+    if(from===to){toast('בחרו שני חברים שונים');return}
+    if(!(a>0)){$('dAmt').focus();toast('כמה החוב?');return}
+    D.entries.push({id:uid(),k:'debt',from,to,amount:r2(a),note:$('dNote').value.trim(),ts:Date.now(),among:[],payer:''});
+    $('dAmt').value='';$('dNote').value='';
+  }
+  commit();toast('נרשם ✓');
+};
+// WhatsApp summary
+$('share').onclick=()=>{
+  const tx=transfers(balances());
+  const txt='💸 מי חייב למי\n'+(tx.length?tx.map(t=>`${pname(t.from)} ← משלם ${fmt(t.amount)} ₪ ל${pname(t.to)}`).join('\n'):'כולם מאוזנים 🎉')+'\n\n'+location.href.split('#')[0];
+  location.href='https://wa.me/?text='+encodeURIComponent(txt);
+};
+
+/* ---------- Firebase ---------- */
+const FB_CONFIG={apiKey:"AIzaSyCnYCrdSMWDvYvlIRR1bCQWwUp8DJ9DFZc",authDomain:"poker-kupa-89ec9.firebaseapp.com",
+  databaseURL:"https://poker-kupa-89ec9-default-rtdb.europe-west1.firebasedatabase.app",projectId:"poker-kupa-89ec9",
+  storageBucket:"poker-kupa-89ec9.firebasestorage.app",messagingSenderId:"519141347563",appId:"1:519141347563:web:472f237148eecf1b3d2eae"};
+function viewNote(){setNote('view',D.people.length?'👀 צפייה בלבד · מתעדכן בזמן אמת':'👀 צפייה בלבד · עוד אין רישומים')}
+function ownerNote(){setNote('owner','🔒 אתה המנהל · כל שינוי נשמר ונשלח לכולם מיד')}
+function init(){
+  render();
+  if(!window.firebase){setNote('warn','⚠️ אין חיבור לאינטרנט: מוצג המצב האחרון שנשמר במכשיר');return}
+  firebase.initializeApp(FB_CONFIG);fbAuth=firebase.auth();fbRef=firebase.database().ref('debts');
+  setNote('view',D.people.length?'👀 טוען את העדכון האחרון…':'טוען…');
+  const t=setTimeout(()=>{if(!gotRemote)setNote('warn','⚠️ לא מצליח להתחבר כרגע, ממשיך לנסות')},10000);
+  fbRef.on('value',sn=>{clearTimeout(t);const d=sn.val();gotRemote=true;
+    if(d){const c=clean(d);if(VIEW||c.updated>D.updated){D=c;try{localStorage.setItem(KEY,JSON.stringify(D))}catch(_){}render()}}
+    else if(VIEW){D={people:[],entries:[],updated:0};render()}
+    VIEW?viewNote():ownerNote();
+  },()=>{clearTimeout(t);setNote('warn','⚠️ לא ניתן לטעון כרגע')});
+  fbAuth.onAuthStateChanged(u=>{fbUser=u;VIEW=!u;$('loginBtn').textContent=u?'🔓':'🔑';
+    if(u)ownerNote();else if(gotRemote)viewNote();render()});
+}
+/* manager sign-in (same account as the poker app) */
+const HEB={'auth/invalid-email':'המייל לא תקין','auth/missing-password':'צריך סיסמה','auth/invalid-credential':'מייל או סיסמה לא נכונים',
+  'auth/wrong-password':'סיסמה לא נכונה','auth/user-not-found':'אין חשבון כזה','auth/too-many-requests':'יותר מדי ניסיונות, נסו שוב בעוד כמה דקות','auth/network-request-failed':'אין חיבור לאינטרנט'};
+$('loginBtn').onclick=()=>{$('loginModal').hidden=false;$('lgErr').textContent='';$('lgForm').hidden=!!fbUser;$('lgOut').hidden=!fbUser;
+  $('lgWho').textContent=fbUser?'מחובר כמנהל: '+fbUser.email:'';if(!fbUser)setTimeout(()=>$('lgEmail').focus(),50)};
+async function signIn(){if(!fbAuth)return;$('lgErr').textContent='';
+  try{await fbAuth.signInWithEmailAndPassword($('lgEmail').value.trim(),$('lgPass').value);$('loginModal').hidden=true;$('lgPass').value='';toast('נכנסת כמנהל ✓')}
+  catch(e){$('lgErr').textContent=HEB[e.code]||('שגיאה: '+(e.code||e.message))}}
+$('lgIn').onclick=signIn;$('lgPass').addEventListener('keydown',e=>{if(e.key==='Enter')signIn()});
+$('lgClose').onclick=()=>$('loginModal').hidden=true;
+$('lgSignOut').onclick=async()=>{await fbAuth.signOut();$('loginModal').hidden=true;toast('יצאת ממצב מנהל')};
+(()=>{const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),sa=navigator.standalone||matchMedia('(display-mode: standalone)').matches;
+  let seen=false;try{seen=localStorage.getItem('hov.ih')==='1'}catch(_){}
+  if(ios&&!sa&&!seen)$('installHint').hidden=false;
+  $('ihClose').onclick=()=>{$('installHint').hidden=true;try{localStorage.setItem('hov.ih','1')}catch(_){}}})();
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+init();
+</script>
+</body>
+</html>
