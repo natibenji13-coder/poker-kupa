@@ -988,7 +988,7 @@ function initSync(){
   },()=>{clearTimeout(timer);setNote('warn','⚠️ לא ניתן לטעון את הערב כרגע')});
   fbAuth.onAuthStateChanged(u=>{
     fbUser=u;$('loginBtn').textContent=u?'🔓':'🔑';
-    if(u){setView(false);ownerNote()}else{setView(true);if(gotRemote)setNote('view','👀 צפייה בלבד · מתעדכן בזמן אמת')}
+    if(u){firebase.database().ref('owner').set(u.uid).catch(()=>{});setView(false);ownerNote()}else{setView(true);if(gotRemote)setNote('view','👀 צפייה בלבד · מתעדכן בזמן אמת')}
     renderAll();
   });
 }
