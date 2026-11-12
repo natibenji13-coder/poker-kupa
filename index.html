@@ -973,16 +973,18 @@ pushRemote=function(){
       .catch(()=>setNote('warn','⚠️ אין הרשאה לשמור: רק המנהל יכול לשנות את הקופה'));
   },350);
 };
+// nothing played yet: viewers still get a full table with sample players instead of an empty room
+function showDemo(){S={players:JSON.parse(JSON.stringify(EXAMPLE)),example:true,mute:S.mute,updated:0};renderAll();
+  setNote('view','👀 הערב עוד לא התחיל · כך זה ייראה, ברגע שהמנהל יתחיל תראו כאן את הערב האמיתי')}
 function initSync(){
   if(!window.firebase){setNote('warn','⚠️ אין חיבור לאינטרנט: מוצג המצב האחרון שנשמר במכשיר');setView(true);return}
   firebase.initializeApp(FB_CONFIG);fbAuth=firebase.auth();fbRef=firebase.database().ref('game');
   setView(true);
-  if(S.example){S={players:[],example:false,mute:S.mute};}
-  renderAll();setNote('view','טוען את הערב…');
+  renderAll();setNote('view',S.players.length?'👀 טוען את העדכון האחרון…':'טוען את הערב…');
   const timer=setTimeout(()=>{if(!gotRemote)setNote('warn','⚠️ לא מצליח להתחבר כרגע, ממשיך לנסות')},10000);
   fbRef.on('value',sn=>{
     clearTimeout(timer);const d=sn.val();
-    if(!d){if(VIEW){S={players:[],example:false,mute:S.mute};renderAll();setNote('view','👀 צפייה בלבד · הערב עוד לא התחיל')}else ownerNote();gotRemote=true;return}
+    if(!d||!toArr(d.players).length){if(VIEW)showDemo();else ownerNote();gotRemote=true;return}
     applyRemote(d);gotRemote=true;
     if(VIEW)setNote('view','👀 צפייה בלבד · מתעדכן בזמן אמת');else ownerNote();
   },()=>{clearTimeout(timer);setNote('warn','⚠️ לא ניתן לטעון את הערב כרגע')});
