@@ -1,0 +1,367 @@
+<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>מתכנן קורות 3D</title>
+<meta name="theme-color" content="#000000">
+<style>:root{box-sizing:border-box}body{margin:0;padding:0}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Secular+One&display=swap">
+<style>
+:root{color-scheme:dark;--bg:#000000;--panel:#08090b;--card:#101215;--card2:#16191d;--field:#0b0c0f;--line:#23262c;--line2:#34383f;--ink:#f4f3ef;--mute:#8f949c;--accent:#ffb627;--accent-2:#ff7a45;--accent-ink:#141006;--good:#3ddc97;--good-bg:rgba(61,220,151,.1);--warn:#ffc94d;--warn-bg:rgba(255,201,77,.1);--bad:#ff6b6b;--bad-bg:rgba(255,107,107,.11);--view-ink:#e9e7e1;--view-chip:rgba(255,255,255,.06);--view-line:rgba(255,255,255,.14);
+--display:"Secular One","IBM Plex Sans Hebrew",Arial,sans-serif;--body:"IBM Plex Sans Hebrew",Arial,sans-serif;--mono:"IBM Plex Mono",Consolas,monospace}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;line-height:1.45}
+*{box-sizing:border-box}
+#app{height:100%;display:grid;grid-template-columns:clamp(290px,23vw,340px) minmax(0,1fr) clamp(310px,26vw,390px);grid-template-rows:auto minmax(0,1fr);gap:10px;padding-block:10px;padding-left:max(10px,env(safe-area-inset-left,0px));padding-right:max(10px,env(safe-area-inset-right,0px));background:var(--bg)}
+header{grid-column:1/-1;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-block:2px;padding-inline:6px}
+.logo{width:30px;height:30px;color:var(--accent);flex:none}
+h1{font-family:var(--display);font-size:22px;font-weight:400;margin:0;letter-spacing:.2px;background:linear-gradient(95deg,#fff 20%,var(--accent) 120%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tag{color:var(--mute);font-size:12.5px}
+.spacer{flex:1}
+select,input,button{font:inherit;color:inherit}
+.btn{border:1px solid var(--line2);background:var(--card);border-radius:9px;padding:7px 13px;cursor:pointer;font-weight:500;transition:border-color .15s,background .15s,transform .1s}
+.btn:hover:not(:disabled){border-color:var(--accent);background:var(--card2)}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:var(--accent-ink);border-color:transparent;font-weight:700;box-shadow:0 4px 22px rgba(255,150,50,.28)}
+.btn.primary:hover:not(:disabled){filter:brightness(1.08);background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+.btn:disabled{opacity:.4;cursor:default}
+:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.side{min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--line2) transparent;display:flex;flex-direction:column;gap:9px;padding-inline:1px;padding-block:1px 12px}
+details,.beams,.block{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:10px 12px}
+summary{cursor:pointer;font-weight:600;font-size:13.5px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"▾";color:var(--mute);font-size:13px;transition:transform .15s}
+details:not([open]) summary::after{transform:rotate(90deg)}
+.rows{display:grid;gap:7px;padding-block:9px 2px}
+.row{display:grid;grid-template-columns:1fr 106px;align-items:center;gap:10px}
+.row label{font-size:13px;min-width:0;color:#d6d5d0}
+.num{display:flex;align-items:center;border:1px solid var(--line);background:var(--field);border-radius:8px;overflow:hidden;transition:border-color .15s,box-shadow .15s}
+.num:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,182,39,.13)}
+.num input{width:100%;min-width:0;border:0;background:transparent;padding:6px 8px;font-family:var(--mono);font-size:13px;direction:ltr;text-align:left;outline:0}
+.num span{padding-inline:7px;font-size:11px;color:var(--mute);white-space:nowrap}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.card{border:1px solid var(--line);background:var(--field);border-radius:10px;padding:6px 2px 4px;cursor:pointer;display:grid;justify-items:center;gap:1px;font-size:11px;color:var(--mute);transition:border-color .15s,color .15s}
+.card svg{width:30px;height:30px}
+.card:hover{border-color:var(--line2);color:var(--ink)}
+.card[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:rgba(255,182,39,.08);font-weight:700}
+.seg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.seg button{border:1px solid var(--line);background:var(--field);border-radius:8px;padding:6px;cursor:pointer;font-size:12.5px;color:var(--mute)}
+.seg button[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:rgba(255,182,39,.08);font-weight:700}
+.bar{display:grid;gap:6px;padding:9px;border:1px solid var(--line);border-radius:10px;background:var(--field)}
+.bar b{font-size:12.5px;display:flex;align-items:center;gap:7px;font-weight:600}
+.bar i{width:9px;height:9px;border-radius:50%;display:inline-block;box-shadow:0 0 9px currentColor}
+.bar .pair{display:grid;grid-template-columns:96px 1fr;gap:7px;align-items:center}
+.bar select,.row2 select{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:5px 6px;font-size:13px;min-width:0;width:100%}
+.bar select{font-family:var(--mono)}
+select option{background:#14161a;color:var(--ink)}
+.bar .num{background:var(--card)}
+.stepper{display:grid;grid-template-columns:28px 1fr 28px;align-items:center;border:1px solid var(--line);border-radius:8px;background:var(--card);overflow:hidden}
+.stepper button{border:0;background:transparent;cursor:pointer;font-size:16px;line-height:1;padding:5px 0;color:var(--mute)}
+.stepper button:hover{color:var(--accent)}
+.stepper output{text-align:center;font-family:var(--mono);font-size:13px}
+.beams{display:grid;gap:7px}
+.row2{display:grid;grid-template-columns:44px 1fr;align-items:center;gap:8px}.row2 label{font-size:13px;color:var(--mute)}
+.beamBtns{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.btn.sm{padding:5px 2px;font-size:12px;border-radius:8px}
+#stage{position:relative;min-width:0;min-height:0;background:radial-gradient(90% 75% at 50% 42%,#15171b 0%,#07080a 58%,#000 100%);overflow:hidden;color:var(--view-ink);border:1px solid var(--line);border-radius:16px}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.hud{position:absolute;display:flex;gap:6px;flex-wrap:wrap;z-index:2}
+#viewsHud{top:12px;inset-inline:12px}
+#layersHud{top:47px;inset-inline:12px}
+.chip{border:1px solid var(--view-line);background:var(--view-chip);color:var(--view-ink);border-radius:999px;padding:4px 11px;font-size:12px;cursor:pointer;backdrop-filter:blur(8px);transition:border-color .15s,background .15s}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="false"]{opacity:.42}
+.chip.v{border-radius:8px;background:rgba(255,255,255,.08);opacity:1}
+#sliders{position:absolute;bottom:12px;inset-inline:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;z-index:2;padding:9px 14px;background:rgba(12,13,16,.72);border:1px solid var(--view-line);border-radius:12px;backdrop-filter:blur(10px)}
+#sliders label{display:grid;grid-template-columns:auto minmax(0,1fr) 54px;gap:9px;align-items:center;font-size:12px}
+#sliders input{width:100%;accent-color:var(--accent)}
+#sliders output{font-family:var(--mono);font-size:11.5px;text-align:left;direction:ltr;white-space:nowrap;color:var(--accent)}
+#hint{position:absolute;bottom:68px;inset-inline-start:16px;font-size:11.5px;opacity:.5;z-index:2}
+#glErr{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;z-index:3}
+#tip{position:absolute;z-index:4;pointer-events:none;background:rgba(12,13,16,.92);border:1px solid var(--accent);color:#fff;border-radius:8px;padding:4px 10px;font-size:12.5px;white-space:nowrap}
+.status{border-radius:13px;padding:12px 14px;display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid transparent;font-weight:700;font-size:15px}
+.st-t{display:grid;gap:3px;min-width:0}.st-t small{font-weight:500;font-size:12px;color:var(--mute)}
+.ring{position:relative;width:66px;height:66px;flex:none}.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:400;font-size:16px;direction:ltr}
+.good{background:var(--good-bg);color:var(--good);border-color:rgba(61,220,151,.28)}.warn{background:var(--warn-bg);color:var(--warn);border-color:rgba(255,201,77,.3)}.bad{background:var(--bad-bg);color:var(--bad);border-color:rgba(255,107,107,.35)}
+.util{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 10px;display:grid;gap:5px;min-width:0}
+.tile.wide{grid-column:1/-1}
+.t-h{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
+.t-h b{font-weight:600;font-size:12.5px;min-width:0}
+.t-p{font-family:var(--display);font-size:17px;direction:ltr;line-height:1}
+.t-s{font-family:var(--mono);font-size:11.5px;color:var(--ink);direction:ltr;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track{height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.fill{height:100%;border-radius:3px;transition:width .3s}
+.t-m{font-size:10.5px;color:var(--mute)}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 16px}
+.kv div{display:flex;justify-content:space-between;gap:8px;padding-block:3px;font-size:12.5px;min-width:0;border-bottom:1px solid var(--line)}
+.kv div:nth-last-child(-n+2){border-bottom:0}
+.kv span{color:var(--mute)}
+.kv b{font-family:var(--mono);font-weight:500;direction:ltr;white-space:nowrap}
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;background:var(--field);border-radius:10px;padding:3px}
+.tabs button{border:0;background:none;padding:6px 2px;cursor:pointer;border-radius:8px;font-weight:600;font-size:12px;color:var(--mute)}
+.tabs button[aria-selected="true"]{color:var(--accent-ink);background:var(--accent)}
+.pane{padding-block:10px 0}
+svg text{font-family:var(--mono);fill:currentColor}
+.chart{width:100%;height:auto;display:block;color:var(--ink);direction:ltr}
+.chart-t{font-size:12.5px;font-weight:600;margin-block:6px 3px;color:var(--mute)}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+th,td{padding:5px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{color:var(--mute);font-weight:600}
+tfoot td{font-weight:700;border-bottom:0;color:var(--accent)}
+table.calc td{white-space:normal}table.calc td:first-child{white-space:nowrap}table.calc td:last-child{white-space:nowrap;font-family:var(--mono);text-align:left;direction:ltr}table.calc .fm{font-family:var(--mono);font-size:11px;color:var(--mute);direction:ltr;text-align:right}
+.note{font-size:11.5px;color:var(--mute);margin-block:8px 0}
+.foot{font-size:11.5px;color:var(--mute);margin:2px 4px}
+@media (max-width:1080px){html,body{height:auto}#app{height:auto;display:flex;flex-direction:column}header{order:0}#stage{order:1;height:84vw;min-height:440px;max-height:72vh;flex:none}#results{order:2}#inputs{order:3}.side{overflow:visible}#viewsHud,#layersHud{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.hud .chip{flex:none}#hint{display:none}}
+@media (max-width:480px){#sliders{grid-template-columns:1fr;gap:4px;padding:7px 11px}.tag{display:none}.tabs button{font-size:11.5px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head><body>
+<div id="app" dir="rtl">
+<header>
+  <svg class="logo" viewBox="0 0 30 30" aria-hidden="true"><path d="M5 5h20v4.5h-7.2v11H25V25H5v-4.5h7.2v-11H5z" fill="currentColor"/></svg><h1>מתכנן קורות 3D</h1><span class="tag">תכן קורות בטון מזוין לפי EN 1992</span><span class="spacer"></span>
+  <select id="preset" class="btn" aria-label="דוגמה לטעינה">
+    <option value="">טעינת דוגמה</option><option value="deep">קורה גבוהה 30/190</option><option value="rect">קורה רגילה רתומה</option><option value="tee">קורת T</option><option value="cant">קונזולה</option>
+  </select>
+  <button id="undo" class="btn" disabled>ביטול פעולה</button><button id="suggest" class="btn primary">הצע זיון</button>
+</header>
+<aside class="side" id="inputs"></aside>
+<main id="stage">
+  <canvas id="gl" aria-label="מודל תלת-ממדי של הקורה"></canvas>
+  <div class="hud" id="viewsHud"></div>
+  <div class="hud" id="layersHud"></div>
+  <div id="tip" hidden></div><div id="hint">גרירה לסיבוב, גלילה לזום, גרירה ימנית להזזה</div>
+  <div id="sliders">
+    <label for="xray"><span>שקיפות בטון</span><input id="xray" type="range" min="0" max="100" value="86"><output id="xrayV"></output></label>
+    <label for="cut"><span>חתך לאורך</span><input id="cut" type="range" min="0" max="100" value="100"><output id="cutV"></output></label>
+  </div>
+  <div id="glErr" hidden>התצוגה התלת-ממדית לא נטענה. בדוק חיבור לאינטרנט ותמיכה ב-WebGL בדפדפן. החישובים ממשיכים לעבוד.</div>
+</main>
+<aside class="side" id="results">
+  <div id="status"></div>
+  <div class="util" id="util"></div>
+  <div class="block kv" id="kv"></div>
+  <div class="block"><div class="tabs" role="tablist" id="tabs"></div><div class="pane" id="pane"></div></div>
+  <p class="foot">כלי עזר לפי EN 1992. הוא לא בודק פיתול ורעידת אדמה, ואת התוצאה צריך לאשר מהנדס.</p>
+</aside>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+/*ENGINE-START*/
+const TYPES=["מלבני","T","L","T הפוך","L הפוך"],SUPS=["פשוט","רתום-פשוט","רתום-רתום","קונזולה"];
+function layerInfo(n,db,p){const sp=Math.max(db/10,2.5),cap=Math.max(1,Math.floor((p.bw-2*p.c-2*p.ds/10+sp)/(db/10+sp))),lay=Math.ceil(n/cap),last=n-cap*(lay-1),ml=(cap*(lay-1)*(lay-2)/2+last*(lay-1))/n;
+  return{sp,cap,lay,last,ml,d:p.h-(p.c+p.ds/10+db/20+ml*(db/10+sp))}}
+function flexure(Mtm,d,dc,flange,bw,bf,hf,fcd,fyd,rmin,deep,zd){const M=Mtm*1e7,dm=d*10,dcm=dc*10,bwm=bw*10,bc=(flange?bf:bw)*10,hc=(flange?hf:0)*10;
+  const Mf=bc*hc*fcd*(dm-hc/2),inF=hc===0||M<=Mf,Mo=inF?0:(bc-bwm)*hc*fcd*(dm-hc/2),Ao=inF?0:(bc-bwm)*hc*fcd/fyd,bcalc=inF?bc:bwm;
+  const mu=(M-Mo)/(bcalc*dm*dm*fcd),m2=Math.min(mu,.295),z=Math.min(.95*dm,dm*(1+Math.sqrt(1-2*m2))/2),xd=(1-z/dm)/.4;
+  const Ac=mu>.295?(M-Mo-.295*bcalc*dm*dm*fcd)/(fyd*(dm-dcm)):0,Af=m2*bcalc*dm*dm*fcd/(z*fyd)+Ao+Ac,Ad=M/(zd(dm)*fyd),Am=rmin*bwm*dm;
+  return{mu,z,xd,Ac,Af,Ad,Am,Rq:Math.max(Am,deep?Ad:Af)}}
+function solve(sp,L,w,Pk,xp){const a=Math.min(L,Math.max(0,xp||0)),b=L-a;let MA,RA;
+  if(sp===0){MA=0;RA=w*L/2+Pk*b/L}else if(sp===1){MA=-(w*L*L/8+Pk*a*b*(L+b)/(2*L*L));RA=5*w*L/8+Pk*b*(3*L*L-b*b)/(2*L*L*L)}else if(sp===2){MA=-(w*L*L/12+Pk*a*b*b/(L*L));RA=w*L/2+Pk*b*b*(3*a+b)/(L*L*L)}else{MA=-(w*L*L/2+Pk*a);RA=w*L+Pk}
+  const M=x=>MA+RA*x-w*x*x/2-(x>a?Pk*(x-a):0),V=x=>RA-w*x-(x>a?Pk:0),xs=[...Array(241)].map((_,i)=>L*i/240);if(w>0&&RA/w<L&&RA/w>0)xs.push(RA/w);xs.push(a);
+  const ms=xs.map(M);return{M,V,Mp:Math.max(0,...ms),Mn:Math.max(0,-Math.min(...ms)),VL:Math.abs(RA-w*L-(Pk)),V0:Math.abs(RA)}}
+function crackCheck(Mtm,As,d,bc,bw,h,cBar,phi,sBar,fctm,Ecm,fi){if(!(Mtm>0)||!(As>0))return{wk:0,sig:0};const M=Mtm*1e7,Es=2e5,Eeff=Ecm/(1+fi),n=Es/Eeff,A=As*100,bm=bc*10,dm=d*10,hm=h*10,rho=A/(bm*dm),x=(-n*rho+Math.sqrt((n*rho)**2+2*n*rho))*dm,z=dm-x/3,sig=M/(A*z);
+  const hce=Math.min(2.5*(hm-dm),(hm-x)/3,hm/2),rp=A/(bw*10*hce),ae=Es/Ecm,de=Math.max(.6*sig/Es,(sig-.4*fctm/rp*(1+ae*rp))/Es),c=cBar*10,sr=sBar*10>5*(c+phi/2)?1.3*(hm-x):3.4*c+.425*.8*.5*phi/rp;return{wk:sr*de,sig,x,sr}}
+function calc(p){const t=TYPES.indexOf(p.type),sp=SUPS.indexOf(p.sup),fl=t>0,bf=fl?p.bf:p.bw,hf=fl?p.hf:0,A=p.bw*p.h+(bf-p.bw)*hf,sw=A/1e4*2.5,wu=p.gG*(p.g+sw)+p.gQ*p.q,L=p.L;
+  const fcd=p.acc*p.fck/p.gc,fyd=p.fyk/p.gs,fctm=.3*Math.pow(p.fck,2/3),rmin=Math.max(.26*fctm/p.fyk,.0013);
+  const Pd=p.gG*(p.Pg||0)+p.gQ*(p.Pq||0),S=solve(sp,L,wu,Pd,p.xP),Mpc=S.Mp,Mnc=S.Mn,Rmax=sp===3?S.V0:Math.max(S.V0,S.VL),V0f=Math.abs(S.V(p.a/200)),V1f=sp===3?0:Math.abs(S.V(L-p.a/200));
+  const num=v=>v!==""&&v!==null&&v!==undefined&&isFinite(v),Mp=num(p.Mp)?Math.abs(p.Mp):Mpc,Mn=num(p.Mn)?Math.abs(p.Mn):Mnc,Vf=num(p.V)?Math.abs(p.V):Math.max(V0f,V1f);
+  const Leq=sp===3?2*L:L,Lh=Leq/(p.h/100),deep=Lh<3,B=layerInfo(p.nb,p.db,p),T=layerInfo(p.nt,p.dt,p),dB=B.d,dT=T.d;
+  const zd=dm=>Math.min(.9*dm,10*(sp===0?(Lh<1?.6*Leq*100:.2*(Leq*100+2*p.h)):(Lh<1?.5*Leq*100:.2*(Leq*100+1.5*p.h))));
+  const fp=flexure(Mp,dB,p.h-dT,t===1||t===2,p.bw,bf,hf,fcd,fyd,rmin,deep,zd),fn=flexure(Mn,dT,p.h-dB,t===3||t===4,p.bw,bf,hf,fcd,fyd,rmin,deep,zd);
+  const reqB=Math.max(fp.Rq,fn.Ac)/100,reqT=Math.max(fn.Rq,fp.Ac)/100,Asb=p.nb*Math.PI*p.db**2/400,Ast=p.nt*Math.PI*p.dt**2/400;
+  const dv=Math.min(dB,dT)*10,zv=.9*dv,nu=.6*(1-p.fck/250),VN=Vf*1e4,s2=2*VN/(p.bw*10*zv*nu*fcd),tmin=Math.atan(1/p.cot)*180/Math.PI,th=s2>=1?45:Math.max(tmin,Math.asin(s2)*90/Math.PI),cot=1/Math.tan(th*Math.PI/180);
+  const Vmx=p.bw*10*zv*nu*fcd/(cot+1/cot)/1e4,vEd=VN/(p.bw*10*dv),k=Math.min(2,1+Math.sqrt(200/dv)),rl=Math.min(.02,Math.min(Asb,Ast)*100/(p.bw*10*dv)),vc=Math.max(.18/p.gc*k*Math.cbrt(100*rl*p.fck),.035*k**1.5*Math.sqrt(p.fck));
+  const Avq=VN/(zv*fyd*cot)*10,Avm=.08*Math.sqrt(p.fck)/p.fyk*p.bw*100,Avr=vEd<=vc?Avm:Math.max(Avq,Avm),Avp=p.ls*Math.PI*p.ds**2/400/(p.ss/100),smx=Math.min(.75*dv/10,deep?30:1e4);
+  const Sdr=deep||p.h>=100?Math.max(1.5,.001*p.bw*100/2):0,Sdp=p.dsd>0?Math.PI*p.dsd**2/400/(p.ssd/100):0,sg=Rmax*1e4/(p.a*p.bw*100),sgR=.85*(1-p.fck/250)*fcd,rhoOK=Asb+Ast<=.04*A;
+  const okB=Asb>=reqB-1e-6,okT=Ast>=reqT-1e-6,okV=Avp>=Avr-1e-6&&p.ss<=smx,okS=Sdp>=Sdr-1e-6,okVmx=Vf<=Vmx,okSg=sg<=sgR,okLay=B.lay<=3&&T.lay<=3;
+  const psi=p.psi2===undefined?.3:p.psi2,wmax=p.wmax||.3,wqp=p.g+sw+psi*p.q,Sq=solve(sp,L,wqp,(p.Pg||0)+psi*(p.Pq||0),p.xP),Ecm=22000*Math.pow((p.fck+8)/10,.3),fi=p.phi===undefined?2.5:p.phi;
+  const sb=(n,db,I)=>I.cap>1?(p.bw-2*p.c-2*p.ds/10-db/10)/(Math.min(n,I.cap)-1||1):p.bw,crB=crackCheck(Sq.Mp,Asb,dB,(t===1||t===2)?bf:p.bw,p.bw,p.h,p.c+p.ds/10,p.db,sb(p.nb,p.db,B),fctm,Ecm,fi),crT=crackCheck(Sq.Mn,Ast,dT,(t===3||t===4)?bf:p.bw,p.bw,p.h,p.c+p.ds/10,p.dt,sb(p.nt,p.dt,T),fctm,Ecm,fi),wk=Math.max(crB.wk,crT.wk),okCr=deep?null:wk<=wmax;
+  const K=[1,1.3,1.5,.4][sp],tens=sp===3?fn:fp,comp=sp===3?fp:fn,dd=sp===3?dT:dB,AsP=sp===3?Ast:Asb,bd=((sp===3?(t===3||t===4):(t===1||t===2))?bf:p.bw)*10*dd*10,AsQ=Math.max(tens.Af,tens.Am),rho=AsQ/bd,rhoc=Math.max(0,sp===3?fn.Ac:fp.Ac)/bd,r0=Math.sqrt(p.fck)/1000,sq=Math.sqrt(p.fck),base=rho<=r0?11+1.5*sq*r0/rho+3.2*sq*Math.pow(r0/rho-1,1.5):11+1.5*sq*r0/(rho-rhoc)+sq*Math.sqrt(rhoc/r0)/12,fT=fl&&bf/p.bw>3?.8:1,fL=sp===0&&L>7?7/L:1,fS=Math.min(1.5,500/p.fyk*AsP*100/AsQ),Ldlim=K*base*fT*fL*fS,Ld=L*100/dd,okDef=deep?null:Ld<=Ldlim;
+  const fctd=.7*fctm/p.gc,fbd=b=>2.25*b*fctd,lbB=p.db/4*fyd/fbd(1),lbT=p.dt/4*fyd/fbd(p.h>25?.7:1);
+  return{wqp,crB,crT,wk,wmax,okCr,Ld,Ldlim,okDef,Ecm,lbB,lbT,Sq,S,Pd,V0f,t,sp,fl,bf,hf,A,sw,wu,L,fcd,fyd,fctm,rmin,Mp,Mn,Vf,Rmax,Leq,Lh,deep,B,T,dB,dT,fp,fn,reqB,reqT,Asb,Ast,dv,th,cot,Vmx,vEd,vc,vmx:Vmx*1e4/(p.bw*10*dv),Avr,Avp,smx,Sdr,Sdp,sg,sgR,rhoOK,okB,okT,okV,okS,okVmx,okSg,okLay,forced:num(p.Mp)||num(p.Mn)||num(p.V),comp:fp.Ac>0||fn.Ac>0}}
+/*ENGINE-END*/
+const $=s=>document.querySelector(s),fx=(v,d=2)=>Number(v).toFixed(d);
+const DEF={type:"מלבני",bw:30,h:190,bf:100,hf:20,c:2.5,fck:25,fyk:500,gc:1.5,gs:1.15,acc:1,cot:2,L:3.7,a:30,sup:"פשוט",g:20,q:5,gG:1.4,gQ:1.2,Mp:"",Mn:"",V:"",nb:4,db:18,nt:4,dt:16,ds:12,ls:2,ss:30,dsd:10,ssd:20,dct:8,sct:60,kct:2,Pg:0,Pq:0,xP:1.85,psi2:.3,wmax:.3,phi:2.5};
+const PRESETS={deep:{...DEF},
+rect:{...DEF,bw:30,h:60,L:6,sup:"רתום-רתום",g:3,q:1.5,nb:3,db:20,nt:4,dt:20,ds:8,ss:15,dsd:0,dct:0},
+tee:{...DEF,type:"T",bw:30,h:60,bf:120,hf:15,L:8,g:3,q:2,nb:6,db:25,nt:2,dt:14,ds:10,ss:15,dsd:0,dct:0},
+cant:{...DEF,type:"L הפוך",bw:30,h:70,bf:60,hf:20,L:2.5,a:40,sup:"קונזולה",g:4,q:1,nb:3,db:12,nt:6,dt:22,ds:10,ss:15,dsd:10,ssd:15,dct:8,sct:45,kct:2}};
+let store={list:[{name:"ק-1",P:{...DEF}}],cur:0};
+try{const j=localStorage.getItem("beam3d-v2");if(j){const s=JSON.parse(j);if(s.list&&s.list.length)store=s}else{const o=localStorage.getItem("beam3d");if(o)store.list[0].P={...DEF,...JSON.parse(o)}}}catch(e){}
+store.cur=Math.min(store.cur||0,store.list.length-1);
+let P={...DEF,...store.list[store.cur].P};
+const save=()=>{store.list[store.cur].P=P;try{localStorage.setItem("beam3d-v2",JSON.stringify(store))}catch(e){}};
+const hist=[];let histLast=JSON.stringify(P),histT=null;
+function histPush(){clearTimeout(histT);histT=setTimeout(()=>{const n=JSON.stringify(P);if(n!==histLast){hist.push(histLast);if(hist.length>60)hist.shift();histLast=n;$("#undo").disabled=false}},350)}
+function undo(){if(!hist.length)return;histLast=hist.pop();P=JSON.parse(histLast);fill();update(false,true);$("#undo").disabled=!hist.length}
+const GLY=["M9 4h12v22H9z","M3 4h24v5H19v17h-8V9H3z","M9 4h18v5H17v17H9z","M11 4h8v17h8v5H3v-5h8z","M9 4h8v17h10v5H9z"];
+const Φ=[6,8,10,12,14,16,18,20,22,25,28,32];
+const inp=$("#inputs");
+const num=(k,l,u)=>`<div class="row"><label for="f_${k}">${l}</label><div class="num"><input id="f_${k}" data-k="${k}" type="number" step="any" inputmode="decimal"><span>${u||""}</span></div></div>`;
+const barG=(lab,col,n,d,extra="")=>`<div class="bar"><b><i style="background:${col}"></i>${lab}</b><div class="pair">${n?`<div class="stepper"><button data-st="${n}" data-d="-1" aria-label="פחות">−</button><output id="o_${n}"></output><button data-st="${n}" data-d="1" aria-label="יותר">+</button></div>`:""}<select id="f_${d}" data-k="${d}" aria-label="קוטר ${lab}">${d==="dsd"||d==="dct"?'<option value="0">בלי</option>':""}${Φ.map(x=>`<option value="${x}">Φ${x}</option>`).join("")}</select></div>${extra}</div>`;
+inp.innerHTML=`<div class="beams"><div class="row2"><label for="beamSel">קורה</label><select id="beamSel"></select></div><div class="row2"><label for="beamName">שם</label><div class="num"><input id="beamName" type="text" style="direction:rtl;text-align:right"></div></div><div class="beamBtns"><button class="btn sm" id="bNew">קורה חדשה</button><button class="btn sm" id="bDup">שכפול</button><button class="btn sm" id="bDel">מחיקה</button></div></div>
+<details open><summary>חתך</summary><div class="rows">
+<div class="cards" id="typeCards">${TYPES.map((t,i)=>`<button class="card" data-type="${t}" aria-pressed="false"><svg viewBox="0 0 30 30"><path d="${GLY[i]}" fill="currentColor"/></svg>${t}</button>`).join("")}</div>
+${num("bw","רוחב גוף bw",'ס"מ')}${num("h","גובה כולל h",'ס"מ')}<div id="flanges" class="rows" style="padding:0">${num("bf","רוחב אגף bf",'ס"מ')}${num("hf","עובי אגף hf",'ס"מ')}</div>${num("c","כיסוי לחישוק",'ס"מ')}</div></details>
+<details open><summary>מפתח וסמכים</summary><div class="rows"><div class="seg" id="supSeg">${SUPS.map(s=>`<button data-sup="${s}" aria-pressed="false">${s}</button>`).join("")}</div>${num("L","מפתח L ציר לציר","מ'")}${num("a","רוחב סמך",'ס"מ')}</div></details>
+<details open><summary>עומסים אופייניים</summary><div class="rows">${num("g","עומס קבוע g","ט'/מ'")}${num("q","עומס שימושי q","ט'/מ'")}${num("gG","מקדם קבוע")}${num("gQ","מקדם שימושי")}</div></details>
+<details><summary>עומס מרוכז</summary><div class="rows">${num("Pg","P קבוע","טון")}${num("Pq","P שימושי","טון")}${num("xP","מרחק מהסמך השמאלי","מ'")}</div></details>
+<details open><summary>זיון</summary><div class="rows">
+${barG("תחתון","#ff5a47","nb","db")}${barG("עליון","#3fb4ff","nt","dt")}
+${barG("חישוקים","#2fe0a0","","ds",`<div class="row"><label for="f_ss">מרווח</label><div class="num"><input id="f_ss" data-k="ss" type="number" step="any"><span>ס"מ</span></div></div><div class="row"><label for="f_ls">מספר חתכים</label><div class="num"><input id="f_ls" data-k="ls" type="number" step="1"></div></div>`)}
+${barG("זיון צד","#ffa726","","dsd",`<div class="row"><label for="f_ssd">מרווח</label><div class="num"><input id="f_ssd" data-k="ssd" type="number" step="any"><span>ס"מ</span></div></div>`)}
+${barG("קלמרות","#c08cff","","dct",`<div class="row"><label for="f_sct">מרווח לאורך</label><div class="num"><input id="f_sct" data-k="sct" type="number" step="any"><span>ס"מ</span></div></div><div class="row"><label for="f_kct">כל כמה שורות צד</label><div class="num"><input id="f_kct" data-k="kct" type="number" step="1"></div></div>`)}
+</div></details>
+<details><summary>חומרים ומקדמים</summary><div class="rows">${num("fck","fck",'מגפ"ס')}${num("fyk","fyk",'מגפ"ס')}${num("gc","γc")}${num("gs","γs")}${num("acc","αcc")}${num("cot","cotθ מרבי")}${num("psi2","ψ2 לעומס שימושי")}${num("wmax","רוחב סדק מותר",'מ"מ')}${num("phi","מקדם זחילה φ")}</div></details>
+<details><summary>כוחות מ-STRAP או ETABS</summary><div class="rows"><p class="note" style="margin:0">ערך שתזין כאן גובר על החישוב מהעומס.</p>${num("Mp","מומנט תכן בשדה","טמ'")}${num("Mn","מומנט תכן בסמך","טמ'")}${num("V","גזירה בפאת הסמך","טון")}</div></details>`;
+function fill(){document.querySelectorAll("[data-k]").forEach(e=>{e.value=P[e.dataset.k]});
+ document.querySelectorAll("[data-type]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.type===P.type));
+ document.querySelectorAll("[data-sup]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sup===P.sup));
+ $("#o_nb").textContent=P.nb;$("#o_nt").textContent=P.nt;$("#flanges").hidden=P.type==="מלבני"}
+function beamUI(){$("#beamSel").innerHTML=store.list.map((b,i)=>`<option value="${i}"${i===store.cur?" selected":""}>${b.name.replace(/</g,"&lt;")}</option>`).join("");$("#beamName").value=store.list[store.cur].name;$("#bDel").disabled=store.list.length<2;$("#bDel").textContent="מחיקה"}
+function goto(i){store.cur=i;P={...DEF,...store.list[i].P};hist.length=0;histLast=JSON.stringify(P);$("#undo").disabled=true;beamUI();fill();update(true)}
+const positive=["bw","h","L","a","fck","fyk","gc","gs","acc","cot","ss","ls"];
+inp.addEventListener("input",e=>{if(e.target.id==="beamName"){store.list[store.cur].name=e.target.value||"קורה";$("#beamSel").options[store.cur].textContent=store.list[store.cur].name;save();return}const k=e.target.dataset.k;if(!k)return;const opt=["Mp","Mn","V"].includes(k);const v=e.target.value===""?(opt?"":P[k]):Number(e.target.value);if(!opt&&!isFinite(v))return;if(positive.includes(k)&&v<=0)return;P[k]=v;update()});
+inp.addEventListener("click",e=>{const t=e.target.closest("[data-type]"),s=e.target.closest("[data-sup]"),st=e.target.closest("[data-st]");
+ if(t){P.type=t.dataset.type;if(t.dataset.type!=="מלבני"&&P.bf<=P.bw)P.bf=P.bw*3;fill();update()}
+ if(s){P.sup=s.dataset.sup;fill();update()}
+ if(st){const k=st.dataset.st;P[k]=Math.min(12,Math.max(1,P[k]+Number(st.dataset.d)));fill();update()}});
+inp.addEventListener("change",e=>{if(e.target.id==="beamSel")goto(Number(e.target.value))});
+inp.addEventListener("click",e=>{const id=e.target.id;if(id==="bNew"){store.list.push({name:"ק-"+(store.list.length+1),P:{...DEF}});goto(store.list.length-1)}if(id==="bDup"){store.list.push({name:store.list[store.cur].name+" עותק",P:{...P}});goto(store.list.length-1)}if(id==="bDel"&&store.list.length>1){if(e.target.textContent==="מחיקה"){e.target.textContent="למחוק?";setTimeout(()=>{e.target.textContent="מחיקה"},2500);return}store.list.splice(store.cur,1);goto(Math.max(0,store.cur-1))}});
+$("#undo").addEventListener("click",undo);addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="z"&&!/INPUT|SELECT/.test(document.activeElement.tagName)){e.preventDefault();undo()}});
+$("#preset").addEventListener("change",e=>{if(PRESETS[e.target.value]){P={...PRESETS[e.target.value]};fill();update(true);e.target.value=""}});
+$("#suggest").addEventListener("click",()=>{for(let i=0;i<3;i++){const r=calc(P);
+ const pick=(req,cur)=>{let best=null;for(const d of [12,14,16,18,20,22,25,28,32]){const a=Math.PI*d*d/400,n=Math.max(2,Math.ceil(req/a-1e-9));if(n>12)continue;const L=layerInfo(n,d,P);if(L.lay>2)continue;const sc=n*a+(n>6?2:0)+L.lay*.4;if(!best||sc<best.sc)best={d,n,sc}}return best||cur};
+ const b=pick(r.reqB,{d:P.db,n:P.nb}),t=pick(r.reqT,{d:P.dt,n:P.nt});P.db=b.d;P.nb=b.n;P.dt=t.d;P.nt=t.n;
+ let done=false;for(const d of [8,10,12,14,16]){const s=Math.floor(Math.min(r.smx,P.ls*Math.PI*d*d/400/r.Avr*100)/5)*5;if(s>=10){P.ds=d;P.ss=s;done=true;break}}if(!done){P.ds=16;P.ss=10}
+ if(r.Sdr>0){P.dsd=P.dsd||10;const a=Math.PI*P.dsd**2/400;P.ssd=Math.min(30,Math.floor(a/r.Sdr*100/5)*5)||20}}
+ fill();update()});
+const fmt=(a,b,c)=>`<span>${a}</span><b>${b}${c?" "+c:""}</b>`;
+let tab="dia";
+const TABS=[["dia","דיאגרמות"],["sec","חתך"],["bbs","רשימת ברזל"],["calc","חישוב מפורט"]];
+$("#tabs").innerHTML=TABS.map(([k,l])=>`<button role="tab" data-t="${k}">${l}</button>`).join("");
+$("#tabs").addEventListener("click",e=>{const k=e.target.dataset.t;if(k){tab=k;renderPane()}});
+let R=null;
+function renderStatus(){const r=R;let cls="good",msg="כל הבדיקות תקינות";
+ const fail=!r.okB?"הזיון התחתון לא מספיק":!r.okT?"הזיון העליון לא מספיק":!r.okV?"החישוקים לא מספיקים":!r.okS?"זיון הצד לא מספיק":!r.okVmx?"הגזירה גדולה מ-Vrd,max: צריך להגדיל את החתך":!r.okSg?"לחץ המגע בסמך גבוה מהגבול":!r.rhoOK?"הזיון מעל 4% משטח החתך":!r.okLay?"המוטות לא נכנסים ברוחב החתך":r.okCr===false?"רוחב הסדק גדול מהמותר":r.okDef===false?"בדיקת L/d לשקיעה לא עוברת":"";
+ if(fail){cls="bad";msg=fail}else if(r.comp){cls="warn";msg="תקין, אבל נדרש זיון לחיצה"}
+ const warn=[];if(r.fl&&P.hf>=P.h)warn.push("עובי האגף גדול מגובה הקורה");if(r.fl&&P.bf<=P.bw)warn.push("רוחב האגף קטן מרוחב הגוף");if((P.Pg||P.Pq)&&(P.xP<0||P.xP>P.L))warn.push("העומס המרוכז מחוץ למפתח");
+ const it=[["תחתון",`${P.nb} Φ${P.db}`,r.Asb,r.reqB,'סמ"ר',r.okB],["עליון",`${P.nt} Φ${P.dt}`,r.Ast,r.reqT,'סמ"ר',r.okT],["חישוקים",`Φ${P.ds}@${P.ss}`,r.Avp,r.Avr,"סמ\"ר/מ'",r.okV],["זיון צד",P.dsd>0?`Φ${P.dsd}@${P.ssd}`:"אין",r.Sdp,r.Sdr,"סמ\"ר/מ'",r.okS],["גזירה",`${fx(r.Vf,1)} טון`,r.Vmx,r.Vf,"טון",r.okVmx],["לחץ מגע",`${fx(r.sg,1)} מגפ"ס`,r.sgR,r.sg,'מגפ"ס',r.okSg]];
+ if(r.deep)it.push(["סדקים ושקיעה","לא נבדקים בקורה גבוהה",null]);else it.push(["רוחב סדק",`${fx(r.wk)} מ"מ`,r.wmax,r.wk,'מ"מ',r.okCr],["שקיעה L/d",fx(r.Ld,1),r.Ldlim,r.Ld,"",r.okDef]);
+ const mx=Math.max(...it.filter(a=>a[2]!==null).map(a=>a[2]>0?a[3]/a[2]:(a[3]>0?9:0)));
+ const rc=fail?"var(--bad)":mx>.9?"var(--warn)":"var(--good)",C=2*Math.PI*27,dash=Math.min(1,mx)*C;
+ $("#status").innerHTML=`<div class="status ${cls}"><div class="st-t"><span>${msg}</span><small>${r.deep?`קורה גבוהה, L/h = ${fx(r.Lh)}. לאמת במודל תמוכות וחוטים.`:`קורה רגילה, L/h = ${fx(r.Lh)}`}</small>${warn.map(w=>`<small>${w}</small>`).join("")}</div><div class="ring" title="ניצול מרבי"><svg viewBox="0 0 66 66"><circle cx="33" cy="33" r="27" fill="none" stroke="#23262c" stroke-width="6"/><circle cx="33" cy="33" r="27" fill="none" stroke="${rc}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${dash} ${C}"/></svg><b>${Math.round(mx*100)}%</b></div></div>`;
+ $("#util").innerHTML=it.map(([n,s,pr,rq,u,ok])=>{if(pr===null)return`<div class="tile wide"><div class="t-h"><b>${n}</b></div><div class="t-m">${s}</div></div>`;const p=pr>0?rq/pr:(rq>0?9:0),w=Math.min(100,p*100),c=!ok?"var(--bad)":p>.9?"var(--warn)":"var(--good)";return`<div class="tile"><div class="t-h"><b>${n}</b><span class="t-p" style="color:${c}">${pr>0||rq>0?Math.round(p*100)+"%":"–"}</span></div><div class="track"><div class="fill" style="width:${w}%;background:${c}"></div></div><div class="t-s">${s}</div><div class="t-m">נדרש ${fx(rq)} מתוך ${fx(pr)} ${u}</div></div>`}).join("");
+ $("#kv").innerHTML=[["עומס תכן",fx(r.wu),"ט'/מ'"],["משקל עצמי",fx(r.sw),"ט'/מ'"],["מומנט שדה",fx(r.Mp),"טמ'"],["מומנט סמך",fx(r.Mn),"טמ'"],["גזירה בפאה",fx(r.Vf),"טון"],["זווית θ",fx(r.th,1),"°"],["d תחתון",fx(r.dB,1),'ס"מ'],["d עליון",fx(r.dT,1),'ס"מ'],["עיגון תחתון",fx(r.lbB/10,0),'ס"מ'],["עיגון עליון",fx(r.lbT/10,0),'ס"מ']].map(a=>`<div>${fmt(...a)}</div>`).join("")}
+function diagram(){const r=R,L=r.L,N=120,xs=[...Array(N+1)].map((_,i)=>L*i/N),M=r.S.M,V=r.S.V;
+ const pl=(f,inv,col,unit)=>{const W=330,H=112,ml=8,mr=8,mid=H/2,ys=xs.map(f),mx=Math.max(...ys.map(Math.abs),1e-9),sc=(H/2-20)/mx,X=x=>ml+(W-ml-mr)*(1-x/L),Y=y=>mid+(inv?1:-1)*y*sc;
+  const pts=xs.map((x,i)=>`${X(x).toFixed(1)},${Y(ys[i]).toFixed(1)}`).join(" ");
+  const ext=[0,N/2|0,N].concat(ys.indexOf(Math.max(...ys)),ys.indexOf(Math.min(...ys))).filter((v,i,a)=>a.indexOf(v)===i).filter(i=>Math.abs(ys[i])>mx*.02);
+  const labs=[];ext.forEach(i=>{const x=Math.min(W-24,Math.max(24,X(xs[i]))),y=Y(ys[i])+((inv?ys[i]:-ys[i])>0?13:-5);if(!labs.some(l=>Math.abs(l.x-x)<44&&Math.abs(l.y-y)<12))labs.push({x,y,t:fx(Math.abs(ys[i]))})});
+  return`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="דיאגרמה"><line x1="${ml}" x2="${W-mr}" y1="${mid}" y2="${mid}" stroke="currentColor" stroke-width="1"/><polygon points="${X(0)},${mid} ${pts} ${X(L)},${mid}" fill="${col}" fill-opacity=".2" stroke="${col}" stroke-width="1.6"/>${labs.map(l=>`<text x="${l.x}" y="${l.y}" font-size="10.5" text-anchor="middle">${l.t}</text>`).join("")}</svg>`};
+ return`<div class="chart-t">מומנט תכן (טמ')</div>${pl(M,true,"#ff5a47")}<div class="chart-t">גזירה תכן (טון)</div>${pl(V,false,"#3fb4ff")}${r.forced?'<p class="note">הדיאגרמות מחושבות מהעומס המפורס. התכן משתמש בכוחות שהזנת.</p>':""}`}
+function barsPos(){const r=R,yc=P.bw/2-P.c-P.ds/10;const mk=(n,d,I,top)=>{const a=[],ys=yc-d/20,z0=top?P.h-P.c-P.ds/10-d/20:P.c+P.ds/10+d/20;for(let i=0;i<n;i++){const l=Math.floor(i/I.cap),c=i-l*I.cap,nl=l<I.lay-1?I.cap:I.last;a.push({y:nl===1?0:-ys+c*2*ys/(nl-1),z:z0+(top?-1:1)*l*(d/10+I.sp),d})}return a};
+ const zb=P.c+P.ds/10+P.db/20,zt=P.h-P.c-P.ds/10-P.dt/20,rows=P.dsd>0?Math.max(0,Math.floor((zt-zb)/P.ssd)-1):0,side=[...Array(rows)].map((_,j)=>zb+(j+1)*(zt-zb)/(rows+1));
+ return{B:mk(P.nb,P.db,r.B,false),T:mk(P.nt,P.dt,r.T,true),side,rows,yc,zb,zt,tie:P.dct>0?side.filter((_,j)=>(j+1)%Math.max(1,Math.round(P.kct))===0):[]}}
+function polygon(){const{bw:b,h}=P,f=R.bf,t=R.hf,e=f-b;return[[[-b/2,0],[b/2,0],[b/2,h],[-b/2,h]],[[-b/2,0],[b/2,0],[b/2,h-t],[f/2,h-t],[f/2,h],[-f/2,h],[-f/2,h-t],[-b/2,h-t]],[[-b/2,0],[b/2,0],[b/2,h-t],[b/2+e,h-t],[b/2+e,h],[-b/2,h]],[[-f/2,0],[f/2,0],[f/2,t],[b/2,t],[b/2,h],[-b/2,h],[-b/2,t],[-f/2,t]],[[-b/2,0],[b/2+e,0],[b/2+e,t],[b/2,t],[b/2,h],[-b/2,h]]][R.t]}
+function sectionSvg(){const pg=polygon(),X=pg.map(p=>p[0]),W=Math.max(...X)-Math.min(...X),H=P.h,G=barsPos(),S=Math.min(190/W,230/H),ox=150-S*(Math.max(...X)+Math.min(...X))/2,base=H*S+10,x=v=>ox+v*S,y=v=>base-v*S,yc=G.yc;
+ const dim=(x1,y1,x2,y2,t,v)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="currentColor" stroke-width=".7"/><text x="${(x1+x2)/2+(v?-5:0)}" y="${(y1+y2)/2+(v?4:-4)}" font-size="10.5" text-anchor="${v?"end":"middle"}">${t}</text>`;
+ const c=(p,col)=>`<circle cx="${x(p.y)}" cy="${y(p.z)}" r="${Math.max(2.2,p.d/20*S)}" fill="${col}"/>`;
+ return`<svg class="chart" viewBox="0 0 300 ${base+28}" role="img" aria-label="חתך הקורה"><polygon points="${pg.map(p=>x(p[0])+","+y(p[1])).join(" ")}" fill="currentColor" fill-opacity=".08" stroke="currentColor" stroke-width="1.4"/>
+ <rect x="${x(-yc)}" y="${y(P.h-P.c-P.ds/20)}" width="${2*yc*S}" height="${(P.h-2*P.c-P.ds/10)*S}" rx="3" fill="none" stroke="#2fe0a0" stroke-width="1.6"/>
+ ${G.tie.map(z=>`<line x1="${x(-yc)}" x2="${x(yc)}" y1="${y(z)}" y2="${y(z)}" stroke="#c08cff" stroke-width="1.4"/>`).join("")}
+ ${G.side.flatMap(z=>[-yc,yc].map(v=>c({y:v,z,d:P.dsd},"#ffa726"))).join("")}${G.B.map(p=>c(p,"#ff5a47")).join("")}${G.T.map(p=>c(p,"#3fb4ff")).join("")}
+ ${dim(x(-P.bw/2),base+14,x(P.bw/2),base+14,"bw="+P.bw)}${dim(16,y(0),16,y(H),"",true)}<text x="21" y="${y(H/2)}" font-size="10.5">${"h="+H}</text></svg>`}
+function bbs(){const G=barsPos(),tot=(R.sp===3?P.L*100+P.a/2:P.L*100+P.a),len=tot-2*P.c,span=R.sp===3?tot-P.a-P.c:P.L*100-P.a,nS=Math.floor(span/P.ss)+1,per=2*((P.bw-2*P.c-P.ds/10)+(P.h-2*P.c-P.ds/10))+20*P.ds/10,tieRows=G.tie.length,tieN=P.dct>0?Math.floor(span/P.sct):0,tieL=2*G.yc+20*P.dct/10;
+ const hk=d=>2*12*d/10,rows=[["תחתון",P.nb,P.db,len+hk(P.db)],["עליון",P.nt,P.dt,len+hk(P.dt)],["חישוקים",nS,P.ds,per],["זיון צד",2*G.rows,P.dsd,len],["קלמרות",tieRows*tieN,P.dct,tieL]].filter(r=>r[1]>0&&r[2]>0);
+ const kg=r=>r[1]*r[3]/100*.00617*r[2]*r[2],totKg=rows.reduce((s,r)=>s+kg(r),0),vol=R.A/1e4*tot/100;
+ $("#pane").innerHTML=`<div class="tbl"><table><thead><tr><th>מוט</th><th>כמות</th><th>Φ</th><th>אורך (מ')</th><th>משקל (ק"ג)</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${fx(r[3]/100)}</td><td>${fx(kg(r),1)}</td></tr>`).join("")}</tbody><tfoot><tr><td colspan="4">סה"כ פלדה</td><td>${fx(totKg,1)}</td></tr></tfoot></table></div>
+ <div class="kv"><div>${fmt('נפח בטון',fx(vol),'מ"ק')}</div><div>${fmt('ריכוז פלדה',fx(totKg/vol,0),'ק"ג/מ"ק')}</div></div>
+ <button id="copy" class="btn">העתקה לאקסל</button><p class="note" id="copyMsg">כולל כיפוף 12Φ בכל קצה. בלי חפיות.</p>`;
+ $("#copy").addEventListener("click",()=>{const t=["מוט\tכמות\tקוטר\tאורך מ'\tמשקל קג"].concat(rows.map(r=>[r[0],r[1],r[2],fx(r[3]/100),fx(kg(r),1)].join("\t"))).join("\n");const m=$("#copyMsg");navigator.clipboard.writeText(t).then(()=>{m.textContent="הטבלה הועתקה."},()=>{m.textContent="ההעתקה נחסמה בדפדפן. אפשר לסמן את הטבלה ולהעתיק ידנית."})})}
+function detail(){const r=R,f=(a,b)=>fx(a,b===undefined?2:b),S=[["עומסים",[["משקל עצמי",`A·2.5 = ${f(r.A/1e4,3)}·2.5`,f(r.sw)+" ט'/מ'"],["עומס תכן wu",`${P.gG}·(${P.g}+${f(r.sw)})+${P.gQ}·${P.q}`,f(r.wu)+" ט'/מ'"],["עומס מרוכז תכן",`${P.gG}·${P.Pg||0}+${P.gQ}·${P.Pq||0}`,f(r.Pd)+" טון"]]],
+["חומרים",[["fcd",`${P.acc}·${P.fck}/${P.gc}`,f(r.fcd)+' מגפ"ס'],["fyd",`${P.fyk}/${P.gs}`,f(r.fyd)+' מגפ"ס'],["fctm","0.3·fck^(2/3)",f(r.fctm)+' מגפ"ס'],["ρmin","max(0.26 fctm/fyk, 0.0013)",f(r.rmin,5)]]],
+["כפיפה בשדה",[["M",r.forced?"הוזן":"לפי סוג הסמיכה",f(r.Mp)+" טמ'"],["d",`h−c−Φs−Φ/2`,f(r.dB,1)+' ס"מ'],["μ",`M/(b·d²·fcd)`,f(r.fp.mu,3)],["x/d","",f(r.fp.xd)],["z",r.deep?"קורה גבוהה":`d(1+√(1−2μ))/2`,f(r.fp.z/10,1)+' ס"מ'],["As כפיפה","",f(r.fp.Af/100)+' סמ"ר'],["As קורה גבוהה","M/(z·fyd)",f(r.fp.Ad/100)+' סמ"ר'],["As מינימלי","ρmin·bw·d",f(r.fp.Am/100)+' סמ"ר'],["As נדרש","",f(r.reqB)+' סמ"ר']]],
+["כפיפה בסמך",[["M","",f(r.Mn)+" טמ'"],["d","",f(r.dT,1)+' ס"מ'],["μ","",f(r.fn.mu,3)],["As נדרש","",f(r.reqT)+' סמ"ר']]],
+["גזירה",[["V בפאת הסמך","",f(r.Vf)+" טון"],["Vd/bd","",f(r.vEd)+' מגפ"ס'],["Vrd,c/bd","EN 1992 6.2.2",f(r.vc)+' מגפ"ס'],["θ","",f(r.th,1)+"°"],["Vrd,max","bw·z·ν·fcd/(cotθ+tanθ)",f(r.Vmx)+" טון"],["Asw/s נדרש","V/(z·fywd·cotθ)",f(r.Avr)+" סמ\"ר/מ'"],["מרווח מרבי","0.75d",f(r.smx,0)+' ס"מ']]],
+["מצב שירות",r.deep?[["סדקים ושקיעה","לא נבדקים בקורה גבוהה","–"]]:[["עומס קוואזי-קבוע",`g+ψ2·q`,f(r.wqp)+" ט'/מ'"],["σs בשדה","M/(As·z)",f(r.crB.sig,0)+' מגפ"ס'],["σs בסמך","",f(r.crT.sig,0)+' מגפ"ס'],["wk","EN 1992 7.3.4",f(r.wk)+' מ"מ'],["L/d מסופק","",f(r.Ld,1)],["L/d מותר","EN 1992 7.4.2",f(r.Ldlim,1)]]],
+["עיגון",[["lb,rqd תחתון","Φ/4·fyd/fbd",f(r.lbB/10,0)+' ס"מ'],["lb,rqd עליון","η1=0.7 באזור עליון",f(r.lbT/10,0)+' ס"מ']]]];
+ $("#pane").innerHTML=S.map(([t,rows])=>`<div class="chart-t">${t}</div><div class="tbl"><table class="calc">${rows.map(a=>`<tr><td>${a[0]}</td><td class="fm">${a[1]}</td><td>${a[2]}</td></tr>`).join("")}</table></div>`).join("")+'<button id="copyC" class="btn" style="margin-top:10px">העתקת החישוב</button><p class="note" id="copyCM"></p>';
+ $("#copyC").addEventListener("click",()=>{const t=S.map(([a,rows])=>a+"\n"+rows.map(x=>x.join("\t")).join("\n")).join("\n\n"),m=$("#copyCM");navigator.clipboard.writeText(t).then(()=>{m.textContent="החישוב הועתק."},()=>{m.textContent="ההעתקה נחסמה בדפדפן."})})}
+function renderPane(){document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.t===tab));if(tab==="dia")$("#pane").innerHTML=diagram();else if(tab==="sec")$("#pane").innerHTML=sectionSvg();else if(tab==="calc")detail();else bbs()}
+function update(refit,noHist){R=calc(P);save();if(!noHist)histPush();renderStatus();renderPane();if(window.scene3d)scene3d.rebuild(refit)}
+beamUI();fill();update(false,true);$("#undo").disabled=true;
+(function(){const stage=$("#stage"),cv=$("#gl");if(!window.THREE||!THREE.OrbitControls){$("#glErr").hidden=false;return}
+let rn;try{rn=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true,preserveDrawingBuffer:true})}catch(e){$("#glErr").hidden=false;return}
+rn.setPixelRatio(Math.min(devicePixelRatio||1,2));rn.localClippingEnabled=true;rn.outputEncoding=THREE.sRGBEncoding;rn.toneMapping=THREE.ACESFilmicToneMapping;rn.toneMappingExposure=1.15;rn.shadowMap.enabled=true;rn.shadowMap.type=THREE.PCFSoftShadowMap;
+const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(28,1,.05,800),ctl=new THREE.OrbitControls(cam,cv);ctl.enableDamping=true;ctl.dampingFactor=.12;ctl.autoRotateSpeed=1.1;
+(function(){const e=new THREE.Scene(),g=new THREE.SphereGeometry(10,24,16),c=document.createElement("canvas");c.width=16;c.height=128;const x=c.getContext("2d"),gr=x.createLinearGradient(0,0,0,128);gr.addColorStop(0,"#ffffff");gr.addColorStop(.45,"#6d7078");gr.addColorStop(.62,"#17181b");gr.addColorStop(1,"#000000");x.fillStyle=gr;x.fillRect(0,0,16,128);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;e.add(new THREE.Mesh(g,new THREE.MeshBasicMaterial({map:t,side:THREE.BackSide})));const pm=new THREE.PMREMGenerator(rn);sc.environment=pm.fromScene(e,.03).texture;pm.dispose()})();
+const sun=new THREE.DirectionalLight(0xfff0dd,1.9);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.bias=-.0006;sc.add(sun,sun.target);const fill2=new THREE.DirectionalLight(0x9fc4ff,.75);fill2.position.set(-7,3,-6);sc.add(fill2);const rim=new THREE.DirectionalLight(0xff9d5c,.5);rim.position.set(7,1,-5);sc.add(rim);
+const root=new THREE.Group();sc.add(root);const clip=new THREE.Plane(new THREE.Vector3(-1,0,0),0);let need=true;const inv=()=>{need=true};
+const LAY=[["concrete","בטון"],["bottom","תחתון"],["top","עליון"],["stir","חישוקים"],["side","צד"],["tie","קלמרות"],["sup","סמכים"],["load","עומס"],["dim","מידות"]],vis={};LAY.forEach(l=>vis[l[0]]=true);
+$("#layersHud").innerHTML=LAY.map(l=>`<button class="chip" data-l="${l[0]}" aria-pressed="true">${l[1]}</button>`).join("");
+$("#viewsHud").innerHTML=[["iso","תלת-ממד"],["front","חזית"],["end","חתך"],["under","מלמטה"]].map(v=>`<button class="chip v" data-v="${v[0]}">${v[1]}</button>`).join("")+`<button class="chip v" id="real" aria-pressed="false" >מצב מציאותי</button><button class="chip v" id="spin" aria-pressed="false" >סיבוב אוטומטי</button>`;
+function tex(draw,w,h){const c=document.createElement("canvas");c.width=w;c.height=h;draw(c.getContext("2d"),w,h);const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=8;return t}
+const ribs=tex((x,w,h)=>{x.fillStyle="#777";x.fillRect(0,0,w,h);x.strokeStyle="#fff";x.lineWidth=7;for(let i=-w;i<h+w;i+=26){x.beginPath();x.moveTo(0,i);x.lineTo(w,i+w*.35);x.stroke()}x.fillStyle="#ddd";x.fillRect(w*.24,0,6,h);x.fillRect(w*.74,0,6,h)},64,128);
+const speck=tex((x,w,h)=>{x.fillStyle="#c9cdc9";x.fillRect(0,0,w,h);for(let i=0;i<5200;i++){const v=165+Math.random()*70|0;x.fillStyle=`rgba(${v},${v},${v-3},.6)`;const r=Math.random()*1.5+.3;x.beginPath();x.arc(Math.random()*w,Math.random()*h,r,0,7);x.fill()}for(let i=0;i<150;i++){x.fillStyle="rgba(70,72,72,.5)";x.beginPath();x.arc(Math.random()*w,Math.random()*h,Math.random()*1.5+.4,0,7);x.fill()}},512,512);speck.encoding=THREE.sRGBEncoding;speck.repeat.set(.9,.9);
+const hatch=tex((x,w,h)=>{x.fillStyle="#c4c9c6";x.fillRect(0,0,w,h);x.strokeStyle="#7e8784";x.lineWidth=2;for(let i=-h;i<w+h;i+=26){x.beginPath();x.moveTo(i,0);x.lineTo(i+h,h);x.stroke()}x.fillStyle="#6f7875";for(let i=0;i<70;i++){x.beginPath();x.arc(Math.random()*w,Math.random()*h,1.6,0,7);x.fill()}},256,256);hatch.encoding=THREE.sRGBEncoding;hatch.repeat.set(5,5);
+const steel=c=>new THREE.MeshStandardMaterial({color:c,metalness:.45,roughness:.42,bumpMap:ribs,bumpScale:.0035,clippingPlanes:[clip],envMapIntensity:.9});
+const COL={bottom:0xff5a47,top:0x3fb4ff,stir:0x2fe0a0,side:0xffa726,tie:0xc08cff},RUST=0x7a6152;
+const M={bottom:steel(COL.bottom),top:steel(COL.top),stir:new THREE.MeshStandardMaterial({color:COL.stir,metalness:.45,roughness:.45,clippingPlanes:[clip]}),side:steel(COL.side),tie:new THREE.MeshStandardMaterial({color:COL.tie,metalness:.45,roughness:.45,clippingPlanes:[clip]}),
+ conc:new THREE.MeshStandardMaterial({color:0xd2d6d3,roughness:.92,metalness:0,map:speck,transparent:true,opacity:.12,side:THREE.DoubleSide,depthWrite:false,clippingPlanes:[clip],envMapIntensity:.7}),
+ cap:new THREE.MeshStandardMaterial({color:0xffffff,map:hatch,roughness:.95,side:THREE.DoubleSide}),
+ sup:new THREE.MeshStandardMaterial({color:0x8a97a1,roughness:.9,map:speck}),load:new THREE.MeshStandardMaterial({color:0xfff0c8,roughness:.4,metalness:.15,emissive:0xffb627,emissiveIntensity:.32}),edge:new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.62,clippingPlanes:[clip]})};
+const floorA=tex((x,w,h)=>{const g=x.createRadialGradient(w/2,h/2,0,w/2,h/2,w/2);g.addColorStop(0,"#fff");g.addColorStop(.42,"#999");g.addColorStop(1,"#000");x.fillStyle=g;x.fillRect(0,0,w,h)},256,256);const shadow=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshStandardMaterial({color:0x060607,roughness:.95,metalness:0,alphaMap:floorA,transparent:true,envMapIntensity:0}));shadow.rotation.x=-Math.PI/2;shadow.receiveShadow=true;sc.add(shadow);
+let grid=null;const groups={};let LEN=1,capG=null,size=[1,1,1],realMode=false;const picks=[];
+function clear(o){o.traverse(c=>{if(c.geometry)c.geometry.dispose();if(c.material&&c.material.map&&c.isSprite){c.material.map.dispose();c.material.dispose()}});while(o.children.length)o.remove(o.children[0])}
+function label(t,p,scale){const c=document.createElement("canvas");c.width=640;c.height=128;const x=c.getContext("2d");x.font="600 58px 'IBM Plex Mono',Consolas,monospace";const w=Math.min(620,x.measureText(t).width+48);x.fillStyle="rgba(0,0,0,.72)";x.fillRect(320-w/2,16,w,96);x.fillStyle="#fff";x.textAlign="center";x.textBaseline="middle";x.fillText(t,320,66);const tx=new THREE.CanvasTexture(c);tx.encoding=THREE.sRGBEncoding;const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,toneMapped:false}));s.position.copy(p);s.scale.set(scale,scale/5,1);s.renderOrder=9;return s}
+function dimLine(a,b){const g=new THREE.BufferGeometry().setFromPoints([a,b]);return new THREE.Line(g,new THREE.LineBasicMaterial({color:0xffffff,transparent:true,opacity:.7,toneMapped:false}))}
+const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
+function bendPath(x0,x1,y,z,hook,dir){const r=Math.min(hook*.5,.06),p=new THREE.CurvePath(),a=x0,b=x1;p.add(new THREE.LineCurve3(V3(a,y+dir*hook,z),V3(a,y+dir*r,z)));p.add(new THREE.QuadraticBezierCurve3(V3(a,y+dir*r,z),V3(a,y,z),V3(a+r,y,z)));p.add(new THREE.LineCurve3(V3(a+r,y,z),V3(b-r,y,z)));p.add(new THREE.QuadraticBezierCurve3(V3(b-r,y,z),V3(b,y,z),V3(b,y+dir*r,z)));p.add(new THREE.LineCurve3(V3(b,y+dir*r,z),V3(b,y+dir*hook,z)));return p}
+function bar(group,d,x0,x1,y,z,hook,dir,mat,info){const tot=x1-x0,g=new THREE.TubeGeometry(bendPath(x0,x1,y,z,hook,dir),Math.min(120,40+tot*14|0),d/2,10,false),uv=g.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getY(i),uv.getX(i)*(tot+2*hook)/(d*3.2));const m=new THREE.Mesh(g,mat);m.castShadow=true;m.userData.info=info;group.add(m);picks.push(m)}
+function stirrupGeom(yc,z0,z1,rs,hook){const P=(a,b)=>V3(0,b,a),rd=Math.min(.035,yc*.28),c=[[-yc,z1],[yc,z1],[yc,z0],[-yc,z0],[-yc,z1]],p=new THREE.CurvePath();const h1=hook,s=.7071;
+ p.add(new THREE.LineCurve3(P(-yc+rd+h1*s,z1-rd-h1*s),P(-yc+rd,z1-rd+.001)));p.add(new THREE.LineCurve3(P(-yc+rd,z1-rd+.001),P(-yc+rd+.001,z1)));
+ for(let i=0;i<4;i++){const a=c[i],b=c[i+1],n=c[i+2]||[yc,z1],dx=Math.sign(b[0]-a[0]),dy=Math.sign(b[1]-a[1]),ex=Math.sign(n[0]-b[0]),ey=Math.sign(n[1]-b[1]);if(i<3){p.add(new THREE.LineCurve3(P(i?a[0]+dx*rd:-yc+rd+.001,i?a[1]+dy*rd:z1),P(b[0]-dx*rd,b[1]-dy*rd)));p.add(new THREE.QuadraticBezierCurve3(P(b[0]-dx*rd,b[1]-dy*rd),P(b[0],b[1]),P(b[0]+ex*rd,b[1]+ey*rd)))}else{p.add(new THREE.LineCurve3(P(a[0]+dx*rd,a[1]+dy*rd),P(-yc,z1-rd)));p.add(new THREE.LineCurve3(P(-yc,z1-rd),P(-yc+h1*s,z1-rd-h1*s)))}}
+ return new THREE.TubeGeometry(p,110,rs,8,false)}
+function rebuild(refit){Object.values(groups).forEach(clear);clear(root);picks.length=0;const r=R,G=barsPos(),u=.01,tot=(r.sp===3?P.L*100+P.a/2:P.L*100+P.a)*u,span0=P.a*u,span1=(r.sp===3?tot/u-P.c:P.L*100)*u;LEN=tot;const X=x=>x-tot/2;
+ ["concrete","bottom","top","stir","side","tie","sup","load","dim"].forEach(k=>{groups[k]=new THREE.Group();groups[k].visible=vis[k];root.add(groups[k])});
+ const pg=polygon(),sh=new THREE.Shape(pg.map(p=>new THREE.Vector2(p[0]*u,p[1]*u))),ex=new THREE.ExtrudeGeometry(sh,{depth:tot,bevelEnabled:false});ex.rotateY(-Math.PI/2);ex.translate(tot/2,0,0);
+ const cuv=ex.attributes.uv,cpos=ex.attributes.position;for(let i=0;i<cuv.count;i++)cuv.setXY(i,cpos.getX(i)+cpos.getZ(i),cpos.getY(i)+cpos.getZ(i)*.5);
+ const cm=new THREE.Mesh(ex,M.conc);cm.renderOrder=5;cm.castShadow=false;groups.concrete.add(cm);groups.concrete.add(new THREE.LineSegments(new THREE.EdgesGeometry(ex,20),M.edge));
+ const c0=X(P.c*u),c1=X(tot-P.c*u),hkB=Math.min(12*P.db/1000,Math.max(.1,P.h*u*.45)),hkT=Math.min(12*P.dt/1000,Math.max(.1,P.h*u*.45));
+ G.B.forEach(b=>bar(groups.bottom,b.d/1000,c0,c1,b.z*u,b.y*u,hkB,1,M.bottom,`זיון תחתון: ${P.nb} Φ${P.db}`));
+ G.T.forEach(b=>bar(groups.top,b.d/1000,c0,c1,b.z*u,b.y*u,hkT,-1,M.top,`זיון עליון: ${P.nt} Φ${P.dt}`));
+ if(P.dsd>0)G.side.forEach(z=>[-1,1].forEach(s=>{const g=new THREE.CylinderGeometry(P.dsd/2000,P.dsd/2000,c1-c0,10);g.rotateZ(Math.PI/2);const m=new THREE.Mesh(g,M.side);m.position.set(0,z*u,s*G.yc*u);m.castShadow=true;m.userData.info=`זיון צד: Φ${P.dsd}@${P.ssd}`;groups.side.add(m);picks.push(m)}));
+ const rs=P.ds/2000,yc=G.yc*u+rs,z0=(P.c+P.ds/20)*u,z1=(P.h-P.c-P.ds/20)*u,tube=stirrupGeom(yc,z0,z1,rs,Math.max(.05,10*P.ds/1000)),nRaw=Math.floor((span1-span0)/(P.ss*u))+1,nS=Math.min(300,nRaw),st=nRaw>300?(span1-span0)/299:P.ss*u,im=new THREE.InstancedMesh(tube,M.stir,nS),mt=new THREE.Matrix4();
+ for(let i=0;i<nS;i++){mt.makeTranslation(X(span0+i*st),0,0);im.setMatrixAt(i,mt)}im.castShadow=true;im.userData.info=`חישוקים: Φ${P.ds}@${P.ss}, ${P.ls} חתכים`;groups.stir.add(im);picks.push(im);
+ if(P.dct>0&&G.tie.length){const rt=P.dct/2000,w=G.yc*u+rt*2,h=Math.max(.04,6*P.dct/1000),tc=new THREE.CurvePath(),A=(y,z)=>V3(0,y,z);tc.add(new THREE.LineCurve3(A(-h,-w),A(0,-w)));tc.add(new THREE.LineCurve3(A(0,-w),A(0,w)));tc.add(new THREE.LineCurve3(A(0,w),A(-h,w)));const tt=new THREE.TubeGeometry(tc,48,rt,6,false),ns=Math.floor((span1-span0)/(P.sct*u)),tm=new THREE.InstancedMesh(tt,M.tie,Math.max(1,ns*G.tie.length));let q=0;for(const z of G.tie)for(let i=0;i<ns;i++){mt.makeTranslation(X(span0+(i+.5)*P.sct*u),z*u+P.dsd/2000+rt,0);tm.setMatrixAt(q++,mt)}tm.count=q;tm.userData.info=`קלמרות: Φ${P.dct}@${P.sct}`;groups.tie.add(tm);picks.push(tm)}
+ capG=new THREE.Group();const sg=new THREE.ShapeGeometry(sh);const suv=sg.attributes.uv;sg.rotateY(-Math.PI/2);const capM=new THREE.Mesh(sg,M.cap);capG.add(capM);const dot=(y,z,d,col)=>{const c=new THREE.Mesh(new THREE.CircleGeometry(d/2,20),new THREE.MeshBasicMaterial({color:col,toneMapped:false}));c.rotation.y=Math.PI/2;c.position.set(.002,z*u,y*u);capG.add(c)};
+ G.B.forEach(b=>dot(b.y,b.z,b.d/1000,COL.bottom));G.T.forEach(b=>dot(b.y,b.z,b.d/1000,COL.top));if(P.dsd>0)G.side.forEach(z=>[-1,1].forEach(s=>dot(s*G.yc,z,P.dsd/1000,COL.side)));
+ const lp=[[-yc,z0],[yc,z0],[yc,z1],[-yc,z1],[-yc,z0]].map(a=>V3(.003,a[1],a[0]));capG.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(lp),new THREE.LineBasicMaterial({color:COL.stir,toneMapped:false})));groups.concrete.add(capG);
+ const H=Math.max(.5,.4*P.h*u),a=P.a*u,bz=Math.max(P.bw*u,.2),top=P.h*u,fixEnd=e=>r.sp===3?e===0:r.sp===2||(r.sp===1&&e===0),sb=(x,e)=>{const fx2=fixEnd(e),hh=H+(fx2?top+H*.7:0),m=new THREE.Mesh(new THREE.BoxGeometry(a,hh,bz),M.sup);m.position.set(x,-H+hh/2,0);m.castShadow=true;m.receiveShadow=true;groups.sup.add(m);if(fx2){M.sup.transparent=false}};
+ if(r.sp===3){sb(X(a/2),0)}else{sb(X(a/2),0);sb(X(tot-a/2),1)}
+ const nA=Math.max(5,Math.min(21,Math.round(tot/.45))),aL=Math.min(.7,Math.max(.25,P.h*u*.35)),cone=new THREE.ConeGeometry(aL*.085,aL*.26,14);cone.rotateX(Math.PI);const sft=new THREE.CylinderGeometry(aL*.02,aL*.02,aL*.75,8);
+ for(let i=0;i<nA;i++){const x=X(tot*(i+.5)/nA),m=new THREE.Mesh(cone,M.load);m.position.set(x,top+aL*.15,0);const s=new THREE.Mesh(sft,M.load);s.position.set(x,top+aL*.65,0);groups.load.add(m,s)}
+ const s0=Math.max(.8,Math.min(1.6,tot*.22));groups.load.add(label(`w = ${fx(r.wu)} t/m`,V3(0,top+aL*1.32,0),s0));
+ if(r.Pd>0){const px=X(P.a/2*u+Math.min(P.L,Math.max(0,P.xP))),big=aL*1.5,cc=new THREE.Mesh(new THREE.ConeGeometry(aL*.14,aL*.4,16),M.load);cc.rotation.x=Math.PI;cc.position.set(px,top+aL*.22,0);const ss=new THREE.Mesh(new THREE.CylinderGeometry(aL*.04,aL*.04,big,10),M.load);ss.position.set(px,top+aL*.4+big/2,0);groups.load.add(cc,ss,label(`P = ${fx(r.Pd)} t`,V3(px,top+aL*2.1,0),s0*.8))}
+ const zf=Math.max(bz/2,r.bf*u/2)+.08,s=Math.max(.7,Math.min(1.5,tot*.2));
+ groups.dim.add(dimLine(V3(X(a/2),-.14,zf),V3(X(r.sp===3?tot:tot-a/2),-.14,zf)),label(`L = ${fx(P.L)} m`,V3(0,-.32,zf),s),dimLine(V3(X(0)-.12,0,zf),V3(X(0)-.12,top,zf)),label(`h = ${P.h} cm`,V3(X(0)-.12-s*.42,top/2,zf),s*.8));
+ applyCut();const y0=-H,y1=top+aL*(r.Pd>0?2.3:1.5),span=Math.max(tot,y1-y0);size=[tot,y1-y0+.2,Math.max(r.bf*u,bz)];root.position.y=-(y0+y1)/2;
+ shadow.position.y=y0+root.position.y-.002;shadow.scale.set(span*5,span*5,1);if(grid){sc.remove(grid);grid.geometry.dispose()}const gs=Math.ceil(span*3);grid=new THREE.GridHelper(gs,Math.round(gs/.5),0xffffff,0xffffff);grid.material.transparent=true;grid.material.opacity=.06;grid.position.y=shadow.position.y;sc.add(grid);
+ sun.position.set(span*.55,span*1.5,span*.8);sun.target.position.set(0,root.position.y,0);const sd=span*1.15;Object.assign(sun.shadow.camera,{left:-sd,right:sd,top:sd,bottom:-sd,near:.1,far:span*5});sun.shadow.camera.updateProjectionMatrix();
+ if(refit||!rebuild.done){view("iso",true);rebuild.done=true}applyMode();inv()}
+function applyCut(){const v=Number($("#cut").value)/100,x=-LEN/2+LEN*v;clip.constant=x;if(capG){capG.position.x=x;capG.visible=v<.995}$("#cutV").textContent=fx(LEN*v)+" m";inv()}
+function applyX(){const v=Number($("#xray").value)/100;$("#xrayV").textContent=Math.round(v*100)+"%";M.conc.opacity=Math.max(.03,1-v);M.conc.color.setHex(v<.5?0xd2d6d3:0x565b62);const solid=v<.04;M.conc.transparent=!solid;M.conc.depthWrite=solid;M.conc.needsUpdate=true;if(groups.concrete&&groups.concrete.children[0])groups.concrete.children[0].castShadow=v<.45;inv()}
+function applyMode(){Object.keys(COL).forEach(k=>{M[k].color.setHex(realMode?RUST:COL[k]);M[k].metalness=realMode?.7:.3;M[k].emissive.setHex(realMode?0:COL[k]);M[k].emissiveIntensity=realMode?0:.38});inv()}
+let anim=null;function view(k,now){const t=2*Math.tan(14*Math.PI/180),asp=Math.max(.6,cv.clientWidth/Math.max(1,cv.clientHeight)),far=Math.max(size[0]/asp,size[1])*1.08/t+size[2],dirs={iso:[.62,.3,.72],front:[0,.02,1],end:[1,.03,.02],under:[.5,-.5,.7]},d=V3(...dirs[k]).normalize().multiplyScalar(k==="end"?Math.max(size[1],size[2])*1.2/t+LEN/2:far),tgt=V3(0,0,0);
+ if(now||matchMedia("(prefers-reduced-motion:reduce)").matches){cam.position.copy(d);ctl.target.copy(tgt);ctl.update();inv();return}const a=cam.position.clone(),t0=performance.now();anim=T=>{const q=Math.min(1,(T-t0)/500),e=1-(1-q)**3;cam.position.lerpVectors(a,d,e);if(q>=1)anim=null;ctl.update();inv()}}
+$("#viewsHud").addEventListener("click",e=>{const v=e.target.dataset.v;if(v)view(v);if(e.target.id==="real"){realMode=!realMode;e.target.setAttribute("aria-pressed",realMode);e.target.style.background=realMode?"#ffb627":"";e.target.style.color=realMode?"#141006":"";const s=$("#xray");s.value=realMode?0:86;applyX();applyMode()}if(e.target.id==="spin"){ctl.autoRotate=!ctl.autoRotate;e.target.setAttribute("aria-pressed",ctl.autoRotate);e.target.style.background=ctl.autoRotate?"#ffb627":"";e.target.style.color=ctl.autoRotate?"#141006":"";inv()}});
+$("#layersHud").addEventListener("click",e=>{const l=e.target.dataset.l;if(!l)return;vis[l]=!vis[l];e.target.setAttribute("aria-pressed",vis[l]);groups[l].visible=vis[l];inv()});
+$("#xray").addEventListener("input",applyX);$("#cut").addEventListener("input",applyCut);ctl.addEventListener("change",inv);
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2(),tip=$("#tip");let last=0;cv.addEventListener("pointermove",e=>{const n=performance.now();if(n-last<60||e.buttons)return;last=n;const b=cv.getBoundingClientRect();mouse.set((e.clientX-b.left)/b.width*2-1,-(e.clientY-b.top)/b.height*2+1);ray.setFromCamera(mouse,cam);const hit=ray.intersectObjects(picks.filter(o=>{let p=o;while(p){if(p.visible===false)return false;p=p.parent}return true}),false).find(h=>h.point.x<=clip.constant+1e-6);if(hit){tip.textContent=hit.object.userData.info;tip.hidden=false;tip.style.left=Math.min(b.width-190,e.clientX-b.left+14)+"px";tip.style.top=(e.clientY-b.top+14)+"px"}else tip.hidden=true});cv.addEventListener("pointerleave",()=>{tip.hidden=true});
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;rn.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();inv()}new ResizeObserver(resize).observe(stage);resize();
+(function loop(t){requestAnimationFrame(loop);if(anim)anim(t||performance.now());ctl.update();if(need||ctl.autoRotate){need=false;rn.render(sc,cam)}})();
+window.scene3d={rebuild,view};applyX();rebuild(true)})();
+</script>
+</body></html>
